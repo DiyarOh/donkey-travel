@@ -10,3 +10,5 @@ Om docker te installeren op Windows is het makkelijkste om deze tutorial te volg
 https://github.com/docker/awesome-compose/tree/master/official-documentation-samples/django/
 
 Vervolgens als dit gelukt is pull je deze repository en volg je de stappen hierboven
+
+Update READme
