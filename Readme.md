@@ -12,3 +12,8 @@ https://github.com/docker/awesome-compose/tree/master/official-documentation-sam
 Vervolgens als dit gelukt is pull je deze repository en volg je de stappen hierboven
 
 Update READme
+
+Om andere functies uit te voeren in de docker terwijl deze runt
+docker exec -t -i b65d457ff653 bash
+
+docker-compose run web python {en dan wat je wilt doen}
