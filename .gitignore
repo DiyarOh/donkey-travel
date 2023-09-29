@@ -1,0 +1,22 @@
+data/
+# Django related
+*.log
+*.pot
+*.pyc
+*.sqlite3
+__pycache__/
+media/
+static/
+node_modules/
+npm-debug.log
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+__init__.py
+
+# Virtual environment
+venv/
+env/
+*.env
