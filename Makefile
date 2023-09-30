@@ -26,8 +26,12 @@ reset:
 
 .PHONY:	start
 start:
-	docker compose	start
+	docker compose	up
 
 .PHONY:	stop
 stop:
-	docker compose	stop
+	docker compose	down
+
+.PHONY: admin
+admin:
+	docker compose run web python manage.py createsuperuser
