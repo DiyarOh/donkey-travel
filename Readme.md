@@ -12,9 +12,9 @@ Om Donkeytravel op je werkstation uit te voeren, moet je eerst de volgende tools
 
 Docker is een essentieel onderdeel van het project, omdat het wordt gebruikt om containers te beheren waarin de applicatie wordt uitgevoerd. Volg deze stappen om Docker op je werkstation te installeren:
 
-- Voor MacOS: Volg de installatie-instructies voor Docker op de [Docker-website voor MacOS](https://docs.docker.com/desktop/install-mac-install/).
+- Voor MacOS: Volg de installatie-instructies voor Docker op de [Docker-website voor MacOS](https://www.docker.com/products/docker-desktop/).
 
-- Voor Windows: Volg de installatie-instructies voor Docker op de [Docker-website voor Windows](https://docs.docker.com/desktop/install-windows-install/).
+- Voor Windows: Volg de installatie-instructies voor Docker op de [Docker-website voor Windows](https://www.docker.com/products/docker-desktop/).
 
 ### Python en Django
 
@@ -74,9 +74,11 @@ Om andere functies uit te voeren in de Docker-container terwijl deze actief is, 
 
 Als je vragen, opmerkingen of problemen hebt, kun je contact met ons opnemen via:
 
-- E-mail: [diyarfranklin2000@gmail.com](mailto:diyarfranklin2000@gmail.com), [9008292@student.zadkine.nl](mailto:9008292@student.zadkine.nl)
+- E-mails:  [diyarfranklin2000@gmail.com](mailto:diyarfranklin2000@gmail.com), 
+            [9008292@student.zadkine.nl](mailto:9008292@student.zadkine.nl)
 
-- Discord: originalmatrix
+- Discords: originalmatrix,
+            captainspazmo
 
 Aarzel niet om contact op te nemen als je hulp nodig hebt of als je wilt bijdragen aan het project. We staan altijd klaar om je te assisteren en te ondersteunen! 
 
