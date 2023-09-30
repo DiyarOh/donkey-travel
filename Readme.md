@@ -36,17 +36,17 @@ Nu je Docker, Python en Django hebt geïnstalleerd, kun je het project op je wer
 
 Als je wijzigingen aanbrengt in de README, zorg er dan voor dat je deze bijwerkt.
 
-### Andere functies uitvoeren in Docker
+### Docker-opdrachten
 
-Om andere functies uit te voeren in de Docker-container terwijl deze actief is, kun je de volgende make-opdrachten gebruiken:
+Hier zijn enkele nuttige Docker-opdrachten om het project te beheren:
 
-- Start het project:
+- Bouw en start het project:
 
   ```bash
-  make start
+  make up
   ```
 
-- Stop het project:
+- Stop het project en verwijder volumes:
 
   ```bash
   make down
@@ -64,11 +64,30 @@ Om andere functies uit te voeren in de Docker-container terwijl deze actief is, 
   make makemigrations
   ```
 
-- Beheer statische bestanden:
+- Update statische bestanden:
 
   ```bash
   make collectstatic
   ```
+
+- Stop het project zonder volumes te verwijderen:
+
+  ```bash
+  make stop
+  ```
+
+- Start het gestopte project:
+
+  ```bash
+  make start
+  ```
+
+- Herstel het project naar de oorspronkelijke staat (stop, verwijder volumes en afbeeldingen):
+
+  ```bash
+  make reset
+  ```
+
 
 ### Contact
 
