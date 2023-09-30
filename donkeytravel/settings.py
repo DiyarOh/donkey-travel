@@ -123,6 +123,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Absolute filesystem path to the directory that will hold static files.
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# The URL to use when referring to static files (CSS, JavaScript, images, etc.)
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
