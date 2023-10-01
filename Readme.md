@@ -88,6 +88,12 @@ Hier zijn enkele nuttige Docker-opdrachten om het project te beheren:
   make reset
   ```
 
+- Maak een super user om in de Django admin panel in te loggen:
+
+  ```bash
+  make admin
+  ```
+
 
 ### Contact
 
