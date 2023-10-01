@@ -2,7 +2,8 @@ PROJECT_NAME=donkeytravel
 
 .PHONY:	up
 up:
-	docker compose up --build -d
+	docker-compose down --volumes --rmi all
+	docker compose up --build
 
 .PHONY:	down
 down:
