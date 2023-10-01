@@ -1,6 +1,7 @@
 services:
   db:
-    image: postgres
+    image: postgis/postgis:16-3.4
+    container_name: db
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
@@ -9,6 +10,7 @@ services:
       - POSTGRES_PASSWORD=postgres
   web:
     build: .
+    container_name: web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
@@ -18,5 +20,7 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
+      - LD_LIBRARY_PATH=/usr/lib
     depends_on:
       - db

@@ -1,12 +1,12 @@
 PROJECT_NAME=donkeytravel
 
-.PHONY:	start
-start:
-	docker compose up 
+.PHONY:	up
+up:
+	docker compose up --build -d
 
 .PHONY:	down
 down:
-	docker compose	down
+	docker compose	down -v
 
 .PHONY: migrate
 migrate:
@@ -20,3 +20,18 @@ makemigrations:
 collectstatic:
 	docker compose run web python manage.py collectstatic --noinput
 
+.PHONY: reset
+reset:
+	docker-compose down --volumes --rmi all
+
+.PHONY:	start
+start:
+	docker compose	up
+
+.PHONY:	stop
+stop:
+	docker compose	down
+
+.PHONY: admin
+admin:
+	docker compose run web python manage.py createsuperuser
