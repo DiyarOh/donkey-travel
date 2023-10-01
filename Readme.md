@@ -94,6 +94,7 @@ Hier zijn enkele nuttige Docker-opdrachten om het project te beheren:
   make admin
   ```
 
+Het kan gebeuren dat je een error krijgt, probeer dan eerst sudo make {de command} te doen. Sommige bestanden staan namelijk op root dus dan heb je sudo nodig deze te beheren.
 
 ### Contact
 
