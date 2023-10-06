@@ -1,0 +1,23 @@
+{% load leaflet_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% leaflet_map "gps" %}
+</body>
+<script>
+    function map_init_basic (map, options) {
+        ...
+        L.marker([50.5, 30.5]).addTo(map);
+        ...
+    }
+</script>
+
+{% leaflet_map "yourmap" callback="window.map_init_basic" %}
+</html>

@@ -1,6 +1,6 @@
 from django.urls import path
-from website.views import HomepageView
+from navigation.views import GpsView
 
 urlpatterns = [
-    path("", HomepageView.as_view(), name='gps'),
+    path("", GpsView.as_view(), name='gps'),
 ]
