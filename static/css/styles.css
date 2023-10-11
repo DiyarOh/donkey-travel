@@ -11,3 +11,7 @@
 .django-leaflet-raw-textarea {
     width: 100%;
 }
+
+body {
+    background-color: bisque;
+}

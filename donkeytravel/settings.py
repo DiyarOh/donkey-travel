@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'website.apps.WebsiteConfig',
     'navigation.apps.NavigationConfig',
     'leaflet',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -121,6 +123,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://example.com",  # Your domain
+    "https://cdn.jsdelivr.net",
+    "https://cdnjs.cloudfare.com",  # CDN domain for OpenLayers
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -133,8 +141,10 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # The URL to use when referring to static files (CSS, JavaScript, images, etc.)
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Automatically find GDAL library path
-GDAL_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libgdal.so.32.3.6.2'
+if not os.path.exists('/usr/lib/x86_64-linux-gnu/libgdal.so.32.3.6.2'):
+    GDAL_LIBRARY_PATH = '/lib/aarch64-linux-gnu/libgdal.so.32'
+else:
+    GDAL_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libgdal.so.32.3.6.2'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
