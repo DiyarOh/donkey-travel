@@ -132,7 +132,11 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Automatically find GDAL library path
-GDAL_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libgdal.so.32.3.6.2'
+
+if not os.path.exists('/usr/lib/x86_64-linux-gnu/libgdal.so.32.3.6.2'):
+    GDAL_LIBRARY_PATH = '/lib/aarch64-linux-gnu/libgdal.so.32'
+else:
+    GDAL_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/libgdal.so.32.3.6.2'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
