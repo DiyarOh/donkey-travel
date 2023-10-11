@@ -12,6 +12,18 @@
     width: 100%;
 }
 
-body {
-    background-color: bisque;
+.flex {
+    display: flex;
+}
+
+.flex-3 {
+    flex: 3;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.header-h1 {
+    margin-left: 45%;
 }

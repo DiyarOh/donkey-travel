@@ -1,22 +1,33 @@
+{% load custom_tags %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>OpenLayers Map</title>
-  <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+    <head>
+        <title>OpenLayers Map</title>
+        <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+        <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
 
-  <style>
+        <style>
       /* Set the map's height */
       #map {
           height: 400px;
           width: 100%;
       }
   </style>
-</head>
-<body>
-  <div id="map"></div>
-  <script>
+    </head>
+    <body>
+        <header class="flex">
+            <img src="#" alt="Hamburger icon">
+            <h1 class="header-h1">Map</h1>
+        </header>
+        <section class="flex">
+            <div id="map" class="flex-3"></div>
+            <div class="menu flex-1"><ul><li>hi</li></ul></div>
+        </section>
+        <script>
     // Create a map object
     const map = new ol.Map({
         target: 'map',
@@ -26,8 +37,8 @@
             })
         ],
         view: new ol.View({
-            center: ol.proj.fromLonLat([0, 0]), // Set the center coordinates (longitude, latitude)
-            zoom: 2 // Set the initial zoom level
+            center: ol.proj.fromLonLat([{{ donkeytravel.location.x }}, {{ donkeytravel.location.y }}]), // Set the center coordinates (longitude, latitude)
+            zoom: 17 // Set the initial zoom level
         })
     });
 
@@ -51,14 +62,14 @@
 
     // Loop through markers and add them to the vector source
     {% for marker in markers %}
-    const {{ marker.name }} = new ol.Feature({
+    const {{ marker.name|js_variable_name  }} = new ol.Feature({
         geometry: new ol.geom.Point(ol.proj.fromLonLat([{{ marker.location.x }}, {{ marker.location.y }}])) // Access the latitude and longitude from the PointField
     });
 
-    {{ marker.name }}.setStyle(markerStyle);
-    vectorSource.addFeature({{ marker.name }});
+    {{ marker.name|js_variable_name  }}.setStyle(markerStyle);
+    vectorSource.addFeature({{ marker.name|js_variable_name }});
     {% endfor %}
 </script>
 
-</body>
+    </body>
 </html>
