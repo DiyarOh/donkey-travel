@@ -12,3 +12,18 @@ class GpsView(View):
         markers = Marker.objects.all()
         donkey_travel = LandMark.objects.filter(name='Donkey Travel').get()
         return render(request, template_name, {"markers": markers, "donkeytravel": donkey_travel})
+
+    def post(self, request, log):
+        pass
+
+
+class RouteView(View):
+    def get(self, request, *args, **kwargs):
+        template_name = "routes.html"
+
+        markers = Marker.objects.all()
+        donkey_travel = LandMark.objects.filter(name='Donkey Travel').get()
+        return render(request, template_name, {"markers": markers, "donkeytravel": donkey_travel})
+
+    def post(self, request, log):
+        pass
