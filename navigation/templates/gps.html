@@ -1,24 +1,75 @@
+{% load custom_tags %}
 {% load static %}
-{% load leaflet_tags %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    {% leaflet_js %}
-    {% leaflet_css %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />     
-    <title>Document</title>
-</head>
-<body>
-    {% leaflet_map "gps" %}
+    <head>
+        <title>OpenLayers Map</title>
+        <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+        <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+
+        <style>
+      /* Set the map's height */
+      #map {
+          height: 400px;
+          width: 100%;
+      }
+  </style>
+    </head>
+    <body>
+        <header class="flex">
+            <img src="#" alt="Hamburger icon">
+            <h1 class="header-h1">Map</h1>
+        </header>
+        <section class="flex">
+            <div id="map" class="flex-3"></div>
+            <div class="menu flex-1"><ul><li>hi</li></ul></div>
+        </section>
+        <script>
+    // Create a map object
+    const map = new ol.Map({
+        target: 'map',
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            })
+        ],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([{{ donkeytravel.location.x }}, {{ donkeytravel.location.y }}]), // Set the center coordinates (longitude, latitude)
+            zoom: 17 // Set the initial zoom level
+        })
+    });
+
+    // Create a vector source for markers
+    const vectorSource = new ol.source.Vector();
+
+    // Create a vector layer with the source
+    const vectorLayer = new ol.layer.Vector({
+        source: vectorSource
+    });
+
+    map.addLayer(vectorLayer);
+
+    const markerStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+            anchor: [0.5, 1],
+            src: 'https://cdn5.vectorstock.com/i/1000x1000/99/84/map-marker-icon-vector-13489984.jpg', // URL to the marker icon
+            scale: 0.01 // Adjust the scale for the desired size (0.5 is 50% of the original size)
+        })
+    });
+
+    // Loop through markers and add them to the vector source
     {% for marker in markers %}
-    {% leaflet_marker marker.location %}
-  {% endfor %}
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-</body>
+    const {{ marker.name|js_variable_name  }} = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([{{ marker.location.x }}, {{ marker.location.y }}])) // Access the latitude and longitude from the PointField
+    });
+
+    {{ marker.name|js_variable_name  }}.setStyle(markerStyle);
+    vectorSource.addFeature({{ marker.name|js_variable_name }});
+    {% endfor %}
+</script>
+
+    </body>
 </html>
