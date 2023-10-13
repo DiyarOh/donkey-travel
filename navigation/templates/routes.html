@@ -2,72 +2,115 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>OpenLayers Map</title>
-        <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
-        <link rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
-        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
-
-        <style>
-      /* Set the map's height */
-      #map {
-          height: 400px;
-          width: 100%;
-      }
-  </style>
-    </head>
-    <body>
-        <header class="flex">
-            <img src="#" alt="Hamburger icon">
-            <h1 class="header-h1">Map</h1>
-        </header>
-        <section class="flex">
-            <div id="map" class="flex-3"></div>
-            <div class="menu flex-1"><ul><li>hi</li></ul></div>
-        </section>
-        <script>
-         // Create a map object
-         const map = new ol.Map({
-                target: 'map',
-                layers: [
-                    new ol.layer.Tile({
-                        source: new ol.source.OSM()
-                    })
-                ],
-                view: new ol.View({
-                    center: ol.proj.fromLonLat([{{ donkeytravel.location.x }}, {{ donkeytravel.location.y }}]), // Set the center coordinates (longitude, latitude),
-                    zoom: 17
+<head>
+    <title>OpenLayers Map</title>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        /* Set the map's height */
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header class="flex">
+        <img src="#" alt="Hamburger icon">
+        <h1 class="header-h1">Map</h1>
+    </header>
+    <section class="flex">
+        <div id="map" class="flex-3"></div>
+        <div class="menu flex-1">
+            <ul>
+                <li>hi</li>
+            </ul>
+        </div>
+    </section>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Create a map object
+        const map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
                 })
+            ],
+            view: new ol.View({
+                center: ol.proj.fromLonLat([{{ donkeytravel.location.x }}, {{ donkeytravel.location.y }}]),
+                zoom: 17
+            })
+        });
+
+        // Create a source for drawing features
+        const drawSource = new ol.source.Vector();
+
+        // Create a vector layer for the drawn features
+        const drawLayer = new ol.layer.Vector({
+            source: drawSource
+        });
+
+        map.addLayer(drawLayer);
+
+        // Create a drawing interaction
+        const draw = new ol.interaction.Draw({
+            source: drawSource,
+            type: 'LineString'
+        });
+
+        map.addInteraction(draw);
+
+        // Function to submit LineString data to Django
+        function submitLineStringData(coordinates) {
+            const lineString = {
+                type: 'LineString',
+                coordinates: coordinates
+            };
+
+            // Send the LineString data to Django as a POST request with CSRF token
+            $.ajax({
+                url: '/follow-me/routes/',
+                method: 'POST',
+                data: JSON.stringify(lineString),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken') // Include the CSRF token in the headers
+                },
+                success: function(data) {
+                    console.log('LineString data sent to Django successfully.');
+                },
+                error: function(error) {
+                    console.error('Error sending LineString data to Django.');
+                }
             });
+        }
 
-            // Create a source for drawing features
-            const drawSource = new ol.source.Vector();
+        // Function to retrieve the CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
-            // Create a vector layer for the drawn features
-            const drawLayer = new ol.layer.Vector({
-                source: drawSource
-            });
+        // Event handler for when a feature is drawn
+        draw.on('drawend', function (event) {
+            const feature = event.feature;
+            const coordinates = feature.getGeometry().getCoordinates();
 
-            map.addLayer(drawLayer);
-
-            // Create a drawing interaction
-            const draw = new ol.interaction.Draw({
-                source: drawSource,
-                type: 'LineString' // You can change this to 'Point', 'Polygon', etc.
-            });
-
-            map.addInteraction(draw);
-
-            // Event handler for when a feature is drawn
-            draw.on('drawend', function (event) {
-                const feature = event.feature;
-                // You can access the geometry and coordinates of the drawn feature here.
-                const coordinates = feature.getGeometry().getCoordinates();
-                console.log(coordinates);
-            });
-</script>
-
-    </body>
+            // Call the function to submit LineString data to Django
+            submitLineStringData(coordinates);
+        });
+    </script>
+</body>
 </html>
