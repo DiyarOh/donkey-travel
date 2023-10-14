@@ -1,18 +1,17 @@
 from django.contrib.gis.db import models
 
-class Marker(models.Model):
-    name = models.CharField(max_length=100)
-    location = models.PointField()
-    
-
-class LandMark(models.Model):
-    name = models.CharField(max_length=100)
-    location = models.PointField()
-
 
 class Route(models.Model):
-    name = models.CharField(max_length=100)  # Name of the route
-    coordinates = models.LineStringField()  # LineStringField to store the coordinates
+    description = models.TextField(default='NoNameRoute')
+    route = models.LineStringField()  # Assuming you want to store a route as a LineString
+    duration_in_days = models.PositiveIntegerField(default=4) # LineStringField to store the coordinates
 
     def __str__(self):
-        return self.name
+        return self.description
+    
+
+class Tracker(models.Model):
+    pincode = models.CharField(max_length=10)
+    location = models.PointField(srid=4326)  # Store the geographic location as a PointField
+    time = models.DateTimeField()
+    booking = models.ForeignKey('website.Booking', on_delete=models.CASCADE, related_name='trackers')

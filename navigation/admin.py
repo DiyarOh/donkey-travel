@@ -1,23 +1,10 @@
 from django.contrib import admin
-from .models import Marker, LandMark, Route
-# Register your models here
-class MarkerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location')
-    search_fields = ('name',)
-    list_filter = ('name',)
+from .models import Route, Tracker
 
-admin.site.register(Marker, MarkerAdmin)
-
-class LandMarkAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location')
-    search_fields = ('name',)
-    list_filter = ('name',)
-
-admin.site.register(LandMark, LandMarkAdmin)
-
+@admin.register(Route)
 class RouteAdmin(admin.ModelAdmin):
-    list_display = ('name', 'coordinates')
-    search_fields = ('name',)
-    list_filter = ('name',)
+    list_display = ('id', 'description', 'route', 'duration_in_days')
 
-admin.site.register(Route, RouteAdmin)
+@admin.register(Tracker)
+class TrackerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'pincode', 'location', 'time', 'booking')

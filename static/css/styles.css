@@ -1,29 +1,389 @@
-.leaflet-container {  /* all maps */
-    width:  600px;
-    height: 400px;
+/* Start of what Diyar added */
+.map {
+    height: 50vh;
+    width: 65%;
 }
 
-#specialbigmap {
-    height: 800px;
+.route-map {
+    height: 70vh;
+    width: 75%;
 }
 
-/* Resize the "display_raw" textbox */
-.django-leaflet-raw-textarea {
-    width: 100%;
-}
-
-.flex {
+.flex-around {
     display: flex;
+    justify-content: space-around;
+    width: 80%;
 }
 
-.flex-3 {
-    flex: 3;
+.controls {
+    width: 35%;
 }
 
-.flex-1 {
+.map-list {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    list-style-type: none;
+}
+
+.map-list li {
+    font-size: 2em;
+    color: black;
+}
+
+.map-list li:last-of-type {
+    margin-top: auto;
+    margin-bottom: 10px;
+}
+
+.map-list a {
+    text-decoration: 0;
+    color: black;
+    font-weight: bold;
+}
+
+.map-list a::after{
+    font-weight: bold;
+    color: black;
+}
+/* Media queries for responsiveness */
+
+@media (max-width: 768px) {
+    #map {
+        width: 100%; /* Full width for smaller screens */
+    }
+
+    .flex-around {
+        width: 100%; /* Full width for smaller screens */
+    }
+
+    .controls {
+        width: 100%; /* Full width for smaller screens */
+    }
+
+    .map-list li {
+        font-size: 1.5em; /* Smaller font size for smaller screens */
+    }
+}
+/* End of what Diyar added */
+html, body {
+    height: 100%;
+  }
+  
+  body {
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../images/d12.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+  .main {
     flex: 1;
+    text-align: center;
+    max-width: 600px;
+    padding: 20px;
+  }
+  .accounttext{
+    color: white;
+    font-weight: bold;
+  }
+  .content {
+    text-align: center;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    text-decoration: none;
+  }
+  
+  .buttons a {
+    display: inline-block;
+    padding: 15px 40px;
+    font-size: 20px;
+    text-decoration: none;
+    color: #ff0000;
+    background-color: #555;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .buttons a:hover {
+    background-color: #333;
+  }
+  
+  /*menu container */
+  .menu-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    z-index: 999;
+  }
+  
+  .menu-button {
+    cursor: pointer;
+    color: white;
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  .menu-button.active {
+    background-color: #000000; 
+    border: 2px solid #000000; 
+    color: white; 
+}
+  .menu {
+    width: 250px;
+    height: 100%;
+    background-color: #333;
+    padding: 20px;
+    z-index: 998;
+    transition: 0.4s;
+    margin-left: -350px;
+  }
+  
+  .menu.open {
+    margin-left: 0;
+  }
+  
+  .menu ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .menu ul li {
+    margin-bottom: 10px;
+  }
+  
+  .menu ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
+  }
+  
+  .menu-image {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .menu-image img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .contents {
+    margin-left: 0;
+    transition: 0.4s;
+  }
+  .logo-container {
+    text-align: center;
+    padding-bottom: 20px;
+    display: inline-block;
+    transition: transform 0.3s ease, cursor 0.3s ease;
+  }
+  
+  .logo-container:hover {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+  
+  .logo-container img {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  /* login/register css */
+  .container {
+    font-family: "Franklin Gothic Medium", Arial, sans-serif;
+    color: #333;
+    padding: 50px;
+    padding-bottom: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    background-image: url('../media/background2.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../media/container.jpg');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.5);
+    z-index: -1;
+  }
+
+  .header-text {
+    font-size: 36px; 
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6); 
+    color: #ffffff;
+    padding: 10px;
 }
 
-.header-h1 {
-    margin-left: 45%;
+  .container h1,
+  .form-group label {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    padding: 1px;
+  }
+  
+  input[type="text"],
+  input[type="password"],
+  input[type="email"] {
+    font-family: "Franklin Gothic Medium", Arial, sans-serif;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #555;
+    color: #fff;
+  }
+  input[type="submit"],
+a.search-button {
+  font-family: "Franklin Gothic Medium", Arial, sans-serif;
+  background-color: #777;
+  color: #ffffff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  text-decoration: none;
 }
+.search-button2 {
+  font-family: "Franklin Gothic Medium", Arial, sans-serif;
+  background-color: #777;
+  color: #ffffff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  text-decoration: none;
+}
+.search-button2:hover {
+  transform: scale(1.1);
+  text-decoration: none;
+}
+input[type="submit"]:hover,
+a.search-button:hover {
+  transform: scale(1.1);
+  text-decoration: none;
+}
+  .form-group{
+    margin-bottom: 10px;
+  }
+  .form-group.register-link {
+    font-family: "Franklin Gothic Medium", Arial, sans-serif;
+    text-align: center;
+    margin-top: 20px;
+    background-color: #777;
+    color: #ffffff;
+    padding: 1px 4px;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  .form-group.register-link a {
+    background-color: #777;
+    color: #ffffff;
+    padding: 1px 1px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: transform 0.3s, color 0.3s;
+    display: inline-block;
+  }
+  
+  .form-group.register-link a:hover {
+    text-decoration: underline;
+    transform: scale(1.1);
+    color: #ff0000;
+  }
+  .button-group input[type="submit"]:hover,
+  .button-group a.search-button:hover {
+    color: #ff0000;
+    text-decoration: none;
+  }
+  a.search-button:active {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  /* Bookings form */
+  table {
+    border-collapse: collapse;
+    width: 50%;
+    margin: 20px;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f2f2f2;
+  }
+
+  .input-field {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .update-button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: black;
+    padding: 10px 5px;
+    text-align: center;
+    color: white;
+    z-index: 2;
+    margin-bottom: 0;
+  }
+  .footer-content {
+    font-size: 14px;
+    color: white;
+  }
