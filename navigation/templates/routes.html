@@ -18,7 +18,26 @@
         <div id="map" class="flex-3"></div>
         <div class="menu flex-1">
             <ul>
-                <li>hi</li>
+                {% comment %} <li><a href="{% url 'index' %}">HomePage</a></li> {% endcomment %}
+                {% comment %} <li><a href="{% url 'bookings' %}">Bookings</a></li> {% endcomment %}
+                {% comment %} <li><a href="{% url 'login' %}">Login</a></li> {% endcomment %}
+                {% comment %} <li><a href="{% url 'map' %}">Map</a></li> {% endcomment %}
+                <li><a href="#">About us</a></li>
+            </ul>
+            <div class="menu-image">
+                <img src="{% static 'images/donkey.png' %}" alt="Image Description">
+            </div>
+        </div>
+    </div>
+    <div class="contents flex-around">
+        <div id="map" class="route-map"></div>
+        <div class="controls">
+            <ul class="map-list">
+                <li><a href="">New Route</a></li>
+                <li><a href="">List Routes</a></li>
+                <li><a href="">Save Route</a></li>
+                <li><a href="">Reset Route</a></li>
+                <li><a href="">Send Route</a></li>
             </ul>
         </div>
     </section>
