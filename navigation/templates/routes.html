@@ -33,25 +33,25 @@
         <div id="map" class="route-map"></div>
         <div class="controls">
             <ul class="map-list">
-                <li><a href="">New Route</a></li>
+                <li><button id="startDrawing">New Route</button></li>
                 <li><a href="">List Routes</a></li>
-                <li><a href="">Save Route</a></li>
-                <li><a href="">Reset Route</a></li>
-                <li><a href="">Send Route</a></li>
+                <li><button id="placeMarker">Place Obstacle</button></li>
+                <li><button id="removeMarker" style="display: none;">Resolve Obstacle</button></li>
+                <li><button>List Obstacles</button></li>
             </ul>
         </div>
     </section>
 
     <!-- Define a hidden popup container -->
-    <div id="popup" class="ol-popup" style="display: none;">
+    <!-- <div id="popup" class="ol-popup" style="display: none;">
         <div id="popup-content">
             <p>Choose an option:</p>
             <button id="startDrawing">Start Drawing</button>
             <button id="placeMarker">Place Marker</button>
             <button id="removeMarker" style="display: none;">Remove Marker</button>
         </div>
-    </div>
-{% endblock %}
+    </div> -->
+    {% endblock %}
 
 {% block script %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -102,22 +102,15 @@
 
         map.addLayer(markersLayer);
 
-        function closePopup() {
-            const popup = document.getElementById('popup');
-            popup.style.display = 'none';
-        }
+
 
         document.getElementById('startDrawing').addEventListener('click', function () {
             if (!draw) {
                 startDrawing();
-                closePopup();
             }
         });
 
         function startDrawing() {
-            const popup = document.getElementById('popup');
-            popup.style.display = 'none';
-
             const drawSource = new ol.source.Vector();
             const drawLayer = new ol.layer.Vector({
                 source: drawSource
@@ -145,9 +138,20 @@
 
         document.getElementById('placeMarker').addEventListener('click', function () {
             markerPlacement = true;
-            closePopup();
         });
 
+        function generateUniqueMarkerId() {
+            const timestamp = new Date().getTime();
+            return `marker_${timestamp}`;
+        
+        }
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based, so add 1.
+            const day = now.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }   
         map.on('click', function (e) {
             if (markerPlacement) {
                 const markerFeature = new ol.Feature({
@@ -157,10 +161,19 @@
                 markerFeature.set('isMarker', true);
                 markersSource.addFeature(markerFeature);
                 markerPlacement = false;
-                openPopup();
-                // Assuming you have an 'id' property on your marker
-                markerFeature.set('id', 'some_marker_id');
-                submitMarkerData(e.coordinate, 'some_marker_id');
+
+                // Extract latitude and longitude from e.coordinate
+                const latitude = e.coordinate[1];
+                const longitude = e.coordinate[0];
+
+                // Generate a unique ID for the marker (you may use a library or server-generated ID)
+                const markerId = generateUniqueMarkerId();  // Implement this function to generate a unique ID.
+
+                // You also need a valid date for datePlaced.
+                const datePlaced = getCurrentDate(); // Implement this function to get the current date.
+
+                markerFeature.set('id', markerId);
+                submitObstacleData(latitude, longitude, datePlaced, markerId);
             } else {
                 const features = map.getFeaturesAtPixel(e.pixel);
                 if (features) {
@@ -169,11 +182,11 @@
                             selectedMarker = feature;
                             document.getElementById('removeMarker').style.display = 'block';
                         }
-                    });
+                    });     
                 }
-                openPopup();
             }
         });
+
 
         document.getElementById('removeMarker').addEventListener('click', function () {
     if (selectedMarker) {
@@ -181,15 +194,9 @@
         markersSource.removeFeature(selectedMarker);
         selectedMarker = null;
         document.getElementById('removeMarker').style.display = 'none';
-        closePopup();
     }
 });
 
-
-        function openPopup() {
-            const popup = document.getElementById('popup');
-            popup.style.display = 'block';
-        }
 
         function submitLineStringData(coordinates) {
             const lineString = {
@@ -202,7 +209,7 @@
                 url: '/follow-me/routes/',
                 method: 'POST',
                 data: JSON.stringify({
-                    action: 'create',  // Specify the action here
+                    action: 'create-route',  // Specify the action here
                     type: 'LineString',
                     coordinates: lineString,
                     description: 'Example',
@@ -221,27 +228,29 @@
             });
         }
 
-        function submitMarkerData(coordinates, markerId) {
-            const markerData = {
-                coordinates: coordinates,
-                id: markerId
-            };
+        function submitObstacleData(latitude, longitude, datePlaced) {
+    const obstacleData = {
+        action: 'create-obstacle',
+        latitude: latitude,
+        longitude: longitude,
+        date_placed: datePlaced
+    };
 
-            // Send marker data to Django using AJAX
-            $.ajax({
-                url: '/follow-me/routes/',
-                type: 'POST',
-                data: markerData,
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                success: function(data) {
-                    console.log('Marker data sent to Django successfully.');
-                },
-                error: function(error) {
-                    console.error('Error sending marker data to Django.');
-                }
-            });
+    $.ajax({
+        url: '/follow-me/routes/',
+        method: 'POST',
+        data: JSON.stringify(obstacleData),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        success: function(data) {
+            console.log('Obstacle data sent to Django successfully.');
+        },
+        error: function(error) {
+            console.error('Error sending obstacle data to Django.');
         }
+    });
+}
     </script>
 {% endblock %}
