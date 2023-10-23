@@ -14,24 +14,44 @@
 {% endblock %}
 
 {% block content %}
-    <div class="contents">
-        <div id="map" class="route-map"></div>
-        <div class="controls">
-            <ul class="map-list">
-                <li><a href="">New Route</a></li>
-                <li><a href="">List Routes</a></li>
-                <li><a href="">Save Route</a></li>
-                <li><a href="">Reset Route</a></li>
-                <li><a href="">Send Route</a></li>
+    <section class="flex">
+        <div id="map" class="flex-3"></div>
+        <div class="menu flex-1">
+            <ul>
+                <li>hi</li>
             </ul>
+        </div>
+    </section>
+
+    <!-- Define a hidden popup container -->
+    <div id="popup" class="ol-popup" style="display: none;">
+        <div id="popup-content">
+            <p>Choose an option:</p>
+            <button id="startDrawing">Start Drawing</button>
+            <button id="placeMarker">Place Marker</button>
+            <button id="removeMarker" style="display: none;">Remove Marker</button>
         </div>
     </div>
 {% endblock %}
 
 {% block script %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Create a map object
+<script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === name + '=') {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         const map = new ol.Map({
             target: 'map',
             layers: [
@@ -45,32 +65,120 @@
             })
         });
 
-        // Create a source for drawing features
-        const drawSource = new ol.source.Vector();
+        let draw;
+        let markerPlacement = false;
+        let selectedMarker = null;
 
-        // Create a vector layer for the drawn features
-        const drawLayer = new ol.layer.Vector({
-            source: drawSource
+        const markersSource = new ol.source.Vector();
+        const markersLayer = new ol.layer.Vector({
+            source: markersSource
         });
 
-        map.addLayer(drawLayer);
-
-        // Create a drawing interaction
-        const draw = new ol.interaction.Draw({
-            source: drawSource,
-            type: 'LineString'
+        const markerStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                src: '{% static "img/marker.PNG" %}',
+                scale: 0.05
+            })
         });
 
-        map.addInteraction(draw);
+        map.addLayer(markersLayer);
 
-        // Function to submit LineString data to Django
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+
+        document.getElementById('startDrawing').addEventListener('click', function () {
+            if (!draw) {
+                startDrawing();
+                closePopup();
+            }
+        });
+
+        function startDrawing() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+
+            const drawSource = new ol.source.Vector();
+            const drawLayer = new ol.layer.Vector({
+                source: drawSource
+            });
+
+            map.addLayer(drawLayer);
+
+            draw = new ol.interaction.Draw({
+                source: drawSource,
+                type: 'LineString'
+            });
+
+            map.addInteraction(draw);
+
+            draw.on('drawend', function (event) {
+                const feature = event.feature;
+                const coordinates = feature.getGeometry().getCoordinates();
+
+                submitLineStringData(coordinates);
+
+                map.removeInteraction(draw);
+                draw = undefined;
+            });
+        }
+
+        document.getElementById('placeMarker').addEventListener('click', function () {
+            markerPlacement = true;
+            closePopup();
+        });
+
+        map.on('click', function (e) {
+            if (markerPlacement) {
+                const markerFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(e.coordinate)
+                });
+                markerFeature.setStyle(markerStyle);
+                markerFeature.set('isMarker', true);
+                markersSource.addFeature(markerFeature);
+                markerPlacement = false;
+                openPopup();
+                // Assuming you have an 'id' property on your marker
+                markerFeature.set('id', 'some_marker_id');
+                submitMarkerData(e.coordinate, 'some_marker_id');
+            } else {
+                const features = map.getFeaturesAtPixel(e.pixel);
+                if (features) {
+                    features.forEach(function (feature) {
+                        if (feature.get('isMarker')) {
+                            selectedMarker = feature;
+                            document.getElementById('removeMarker').style.display = 'block';
+                        }
+                    });
+                }
+                openPopup();
+            }
+        });
+
+        document.getElementById('removeMarker').addEventListener('click', function () {
+    if (selectedMarker) {
+        // Remove the selected marker from the map
+        markersSource.removeFeature(selectedMarker);
+        selectedMarker = null;
+        document.getElementById('removeMarker').style.display = 'none';
+        closePopup();
+    }
+});
+
+
+        function openPopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'block';
+        }
+
         function submitLineStringData(coordinates) {
             const lineString = {
                 type: 'LineString',
                 coordinates: coordinates
             };
 
-            // Send the LineString data to Django as a POST request with CSRF token
+
             $.ajax({
                 url: '/follow-me/routes/',
                 method: 'POST',
@@ -94,29 +202,27 @@
             });
         }
 
-        // Function to retrieve the CSRF token from cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+        function submitMarkerData(coordinates, markerId) {
+            const markerData = {
+                coordinates: coordinates,
+                id: markerId
+            };
+
+            // Send marker data to Django using AJAX
+            $.ajax({
+                url: '/follow-me/routes/',
+                type: 'POST',
+                data: markerData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function(data) {
+                    console.log('Marker data sent to Django successfully.');
+                },
+                error: function(error) {
+                    console.error('Error sending marker data to Django.');
                 }
-            }
-            return cookieValue;
+            });
         }
-
-        // Event handler for when a feature is drawn
-        draw.on('drawend', function (event) {
-            const feature = event.feature;
-            const coordinates = feature.getGeometry().getCoordinates();
-
-            // Call the function to submit LineString data to Django
-            submitLineStringData(coordinates);
-        });
     </script>
 {% endblock %}
