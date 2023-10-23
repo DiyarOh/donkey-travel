@@ -1,0 +1,92 @@
+{% load custom_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>OpenLayers Map</title>
+        <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+        <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    </head>
+    <body>
+        <header>
+            <h1 class="header-text">Map</h1>
+        </header>
+        <div class="menu-container">
+            <button id="menu-button" class="menu-button">&#9776;</button>
+            <div class="menu">
+                <ul>
+                    {% comment %} <li><a href="{% url 'index' %}">HomePage</a></li> {% endcomment %}
+                    {% comment %} <li><a href="{% url 'bookings' %}">Bookings</a></li> {% endcomment %}
+                    {% comment %} <li><a href="{% url 'login' %}">Login</a></li> {% endcomment %}
+                    {% comment %} <li><a href="{% url 'map' %}">Map</a></li> {% endcomment %}
+                    <li><a href="#">About us</a></li>
+                </ul>
+                <div class="menu-image">
+                    <img src="{% static 'images/donkey.png' %}" alt="Image Description">
+                </div>
+            </div>
+        </div>
+        <div class="contents flex-around">
+            <div id="map" class="map"></div>
+            <div class="controls">
+                <ul class="map-list">
+                    <li><a href="">Report Obstacle</a></li>
+                    <li><a href="">Request Help</a></li>
+                    <li><a href="">Route Changes</a></li>
+                    <li><a href="">Call Checkpoint</a></li>
+                </ul>
+            </div>
+        </div>
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2023 DonkeyTravel. All rights reserved.</p>
+            </div>
+        </footer>
+        <script>
+            // Create a map object
+            const map = new ol.Map({
+                target: 'map',
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM()
+                    })
+                ],
+                view: new ol.View({
+                    center: ol.proj.fromLonLat([5.048809728652404, 51.6514359606463]), // Set the center coordinates (longitude, latitude)
+                    zoom: 17 // Set the initial zoom level
+                })
+            });
+
+            // Create a vector source for markers
+            const vectorSource = new ol.source.Vector();
+
+            // Create a vector layer with the source
+            const vectorLayer = new ol.layer.Vector({
+                source: vectorSource
+            });
+
+            map.addLayer(vectorLayer);
+
+            const markerStyle = new ol.style.Style({
+                image: new ol.style.Icon({
+                    anchor: [0.5, 1],
+                    src: 'https://cdn5.vectorstock.com/i/1000x1000/99/84/map-marker-icon-vector-13489984.jpg', // URL to the marker icon
+                    scale: 0.01 // Adjust the scale for the desired size (0.5 is 50% of the original size)
+                })
+            });
+
+            // Loop through markers and add them to the vector source
+            {% for marker in markers %}
+                const {{ marker.name|js_variable_name  }} = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([{{ marker.location.x }}, {{ marker.location.y }}])) // Access the latitude and longitude from the PointField
+                });
+
+                {{ marker.name|js_variable_name  }}.setStyle(markerStyle);
+                vectorSource.addFeature({{ marker.name|js_variable_name }});
+            {% endfor %}
+        </script>
+        {% comment %} <script src="{% static 'javascript/navbar.js' %}"></script> {% endcomment %}
+    </body>
+</html>

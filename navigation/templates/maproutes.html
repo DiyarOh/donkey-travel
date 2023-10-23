@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+         // Create a map object
+         const map = new ol.Map({
+                target: 'map',
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM()
+                    })
+                ],
+                view: new ol.View({
+                    center: ol.proj.fromLonLat([{{ donkeytravel.location.x }}, {{ donkeytravel.location.y }}]), // Set the center coordinates (longitude, latitude),
+                    zoom: 17
+                })
+            });
+
+            // Create a source for drawing features
+            const drawSource = new ol.source.Vector();
+
+            // Create a vector layer for the drawn features
+            const drawLayer = new ol.layer.Vector({
+                source: drawSource
+            });
+
+            map.addLayer(drawLayer);
+
+            // Create a drawing interaction
+            const draw = new ol.interaction.Draw({
+                source: drawSource,
+                type: 'LineString' // You can change this to 'Point', 'Polygon', etc.
+            });
+
+            map.addInteraction(draw);
+
+            // Event handler for when a feature is drawn
+            draw.on('drawend', function (event) {
+                const feature = event.feature;
+                // You can access the geometry and coordinates of the drawn feature here.
+                const coordinates = feature.getGeometry().getCoordinates();
+                console.log(coordinates);
+            });
+    </script>
+</body>
+</html>
