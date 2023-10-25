@@ -1,59 +1,55 @@
 html, body {
-    height: 100%;
-  }
-  
-  body {
-    overflow-y: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-image: url('../images/container.jpg');
-    background-size: cover;
-    background-position: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-  }
-  .main {
-    flex: 1;
-    text-align: center;
-    max-width: 600px;
-    padding: 20px;
-  }
-  .accounttext{
-    color: white;
-    font-weight: bold;
-  }
-  .content {
-    text-align: center;
-    margin: auto;
-    padding: 20px;
-  }
-  
-  .buttons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-    text-decoration: none;
-  }
-  
-  .buttons a {
-    display: inline-block;
-    padding: 15px 40px;
-    font-size: 20px;
-    text-decoration: none;
-    color: #ff0000;
-    background-color: #555;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .buttons a:hover {
-    background-color: #333;
-  }
-  
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background-image: url('../images/d12.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  margin: 0;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  text-align: center;
+  max-width: 600px;
+  padding: 20px;
+}
+
+.accounttext {
+  color: white;
+  font-weight: bold;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  text-decoration: none;
+}
+
+.buttons a {
+  display: inline-block;
+  padding: 15px 40px;
+  font-size: 20px;
+  text-decoration: none;
+  color: #ff0000;
+  background-color: #555;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.buttons a:hover {
+  background-color: #333;
+}
+
   /*menu container */
   .menu-container {
     position: fixed;
@@ -116,29 +112,24 @@ html, body {
     width: 100%;
     height: auto;
   }
-  
-  .contents {
-    margin-left: 0;
-    transition: 0.4s;
-  }
+
   .logo-container {
     text-align: center;
-    padding-bottom: 20px;
-    display: inline-block;
-    transition: transform 0.3s ease, cursor 0.3s ease;
-  }
-  
-  .logo-container:hover {
+}
+
+  .logo-container:hover img {
     transform: scale(1.2);
     cursor: pointer;
   }
-  
+
   .logo-container img {
     width: 120px;
     height: auto;
     display: block;
     margin: 0 auto;
+    transition: transform 0.3s ease, cursor 0.3s ease;
   }
+
   /* login/register css */
   .container {
     font-family: "Franklin Gothic Medium", Arial, sans-serif;
@@ -168,7 +159,62 @@ html, body {
     filter: brightness(0.5);
     z-index: -1;
   }
-  
+/* Headers */
+
+.header {
+  position: fixed;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  top: 0;
+  width: 100%;
+}
+
+.header-text-container {
+  display: flex;
+  align-items: center;
+  margin: 0 auto; /* Horizontally center the text container */
+}
+
+.header-text {
+  font-size: 36px;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0;
+}
+
+.create-booking-button {
+  text-decoration: none;
+  background-color: #050808;
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-booking-button:hover {
+  transform: scale(1.05);
+}
+
+.sub-header-text {
+  font-size: 24px; 
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  color: #ffffff;
+  padding: 10px;
+}
+
   .container h1,
   .form-group label {
     background-color: rgba(0, 0, 0, 0.6);
@@ -259,49 +305,268 @@ a.search-button:hover {
     color: #ffffff;
     text-decoration: none;
   }
-  /* Bookings form */
-  table {
-    border-collapse: collapse;
-    width: 50%;
-    margin: 20px;
+  /* dashboard */
+  
+  .dashboard-links {
+    position: sticky;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    max-width: 600px;
+    width: 80%; 
+    margin: auto; 
   }
+  
 
-  th, td {
-    border: 1px solid black;
+  /* Bookings  */
+  
+  .table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+  }
+  
+  .Bookings-form-table {
+    width: 50%;
+    background-color: rgba(0, 0, 0, 0.911);
+    border: 1px solid #ccc;
+  }
+  
+  .Bookings-form-table th {
+    background-color: #125205;
+    color: #fff;
+    border: 1px solid #125205;
     padding: 8px;
     text-align: left;
   }
-
-  th {
-    background-color: #f2f2f2;
+  
+  .Bookings-form-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    color: #fff;
   }
-
+  
   .input-field {
     width: 100%;
     box-sizing: border-box;
   }
-
+  
   .update-button {
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
+      padding: 10px 20px; 
+      background-color: #125205;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+      font-weight: bold; 
   }
 
-  footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: black;
-    padding: 10px 5px;
-    text-align: center;
-    color: white;
-    z-index: 2;
-    margin-bottom: 0;
+  .update-button2 {
+      padding: 10px 20px; 
+      background-color: #125205;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+      font-weight: bold; 
   }
-  .footer-content {
-    font-size: 14px;
-    color: white;
+  
+  .delete-button,
+  .delete-button2 {
+      padding: 10px 20px; 
+      background-color: red;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+      font-weight: bold; 
   }
+  
+  .update-button:hover,
+  .delete-button:hover,
+  .update-button2:hover,
+  .delete-button2:hover {
+      background-color: #000000;
+      transform: scale(1.05);
+  }
+  
+   /* Dashboard  */
+   
+   .dashboard-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: 50%;
+  }
+
+.dashboard-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background-color: rgba(0, 0, 0, 0.911);
+  color: #fff;
+  border: 1px solid #ccc;
+  padding: 60px 400px;
+  width: 50%;
+  border-radius: 5px;
+  margin: 10px 0;
+  font-size: 24px;
+  font-weight: bold; 
+}
+
+/* about us */
+
+.about-us {
+  padding: 40px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.7); /* Dark background color with transparency */
+  background-image: url('../images/d6.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  position: relative;
+  color: white; /* Set the text color to white */
+}
+
+.about-us .content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.about-us h2,
+.about-us h3,
+.about-us p,
+.about-us ul {
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.7); /* Text background with transparency */
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.about-us .content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.about-us h2,
+.about-us h3 {
+  font-size: 28px; /* Increase the font size */
+  color: white; /* Set text color to white */
+  font-weight: bold; /* Make the text bold */
+  background-color: rgba(0, 0, 0, 0.7); /* Text background with transparency */
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.about-us p,
+.about-us ul {
+  font-size: 20px; /* Increase the font size */
+  color: white; /* Set text color to white */
+  font-weight: bold; /* Make the text bold */
+  background-color: rgba(0, 0, 0, 0.7); /* Text background with transparency */
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.about-us ul {
+  list-style: disc;
+  margin-left: 20px;
+}
+
+/* video */
+
+.hero {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  text-align: center;
+}
+
+.hero-container {
+  height: 100vh;
+}
+
+.video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+}
+
+.hero h1 {
+  font-size: 36px;
+  margin: 0;
+}
+
+.hero p {
+  font-size: 18px;
+  margin: 20px 0;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #FFA500;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* footer */
+.footer-content {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* buttons */
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;
+}
+
+.update-button2 {
+  margin-top: 10px;
+  margin-right: 300px;
+}
+
+.delete-button2 {
+  margin-top: 10px;
+  margin-left: 300px;
+}
