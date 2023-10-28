@@ -13,7 +13,7 @@ class Booking(models.Model):
 class Customer(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(null=True, max_length=20)
     password = models.CharField(max_length=255)
     last_edited = models.DateTimeField(auto_now=True)
 
