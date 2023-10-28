@@ -1,9 +1,9 @@
 from django.urls import path
-from website.views import HomepageView, LoginView, RegisterView, BookingsView, MapView, AccountView, AccountLoginView, BookingCreateView, Bookings2View, ChangeRouteView, GuestDashboardView, GuestBookingsView, Map2View, RoutesView, StaffAccommodationsView, StaffBookingsView, StaffDashboardView, CreateBookingView, AccommodationsView, DeleteAccommodationsView
+from website.views import HomepageView, BookingsView, MapView, AccountView, AccountLoginView, BookingCreateView, Bookings2View, ChangeRouteView, GuestDashboardView, GuestBookingsView, Map2View, RoutesView, StaffAccommodationsView, StaffBookingsView, StaffDashboardView, CreateBookingView, AccommodationsView, DeleteAccommodationsView
+
+
 urlpatterns = [
     path("", HomepageView.as_view(), name='index'),
-    path("login/", LoginView.as_view(), name='login'),
-    path("register/", RegisterView.as_view(), name='register'),
     path("bookings/", BookingsView.as_view(), name='bookings'),
     path("map/", MapView.as_view(), name='map'),
     path("account/", AccountView.as_view(), name='account'),

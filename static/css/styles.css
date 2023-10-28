@@ -13,6 +13,7 @@
   display: flex;
 margin-top: 10%;
 margin-left: 10%;
+margin-right: 10%;
 background-color: white;
 
 }
@@ -76,7 +77,6 @@ background-color: white;
 }
 /* End of what Diyar added */
 html{
-  height: 100%;
   margin: 0;
   padding: 0;
 }
@@ -90,7 +90,7 @@ body {
   background-attachment: fixed;
   margin: 0;
   min-height: 100vh;
-  width: 90vw;
+  width: 100%
 }
 
 .main {
@@ -386,10 +386,7 @@ a.search-button:hover {
   /* dashboard */
   
   .dashboard-links {
-    position: sticky;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    /* position: sticky; */
     text-align: center;
     max-width: 600px;
     width: 80%; 
@@ -478,7 +475,8 @@ a.search-button:hover {
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-    height: 50%;
+    height: 40%;
+    margin-top: 10%;
   }
 
 .dashboard-links a {
@@ -489,11 +487,11 @@ a.search-button:hover {
   background-color: rgba(0, 0, 0, 0.911);
   color: #fff;
   border: 1px solid #ccc;
-  padding: 60px 400px;
+  padding: 50px 200px;
   width: 50%;
   border-radius: 5px;
   margin: 10px 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold; 
 }
 
