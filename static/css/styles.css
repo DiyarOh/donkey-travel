@@ -75,6 +75,19 @@ background-color: white;
         font-size: 1.5em; /* Smaller font size for smaller screens */
     }
 }
+
+.errorlist {
+  display: flex;
+  justify-content: center;
+}
+.errorlist li{
+  font-size: large;
+  color: red;
+  background-color: white;
+  text-wrap: wrap;
+  max-width: 50%;
+  text-align: center;
+}
 /* End of what Diyar added */
 html{
   margin: 0;
