@@ -1,14 +1,21 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{% block title %}{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v8.1.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.1.0/ol.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="icon" href="{% static 'images/logo.jpg' %}" type="image/x-icon">
 </head>
+
 <body>
+    {% block header %}
+    {% endblock %}
     <div class="menu-container">
         <button id="menu-button" class="menu-button">&#9776;</button>
         <div class="menu">
@@ -25,14 +32,17 @@
             </div>
         </div>
     </div>
-    <div class="contents">
-        <!-- Your website content goes here -->
-    </div>
+    <section>   
+        {% block content %}
+        {% endblock %}
+        {% block script %}
+        {% endblock %}
+    </section>
     <script src="{% static 'javascript/navbar.js' %}"></script>
     <footer>
         <div class="footer-content">
-            <p>&copy; 2023 DonkeyTravel. All rights reserved.</p>
+            <p>&copy; {% now "Y" %} DonkeyTravel. All rights reserved.</p>
         </div>
     </footer>
-    </body>
+</body> 
 </html>

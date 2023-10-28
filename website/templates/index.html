@@ -1,83 +1,65 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="icon" href="{% static 'images/logo.jpg' %}" type="image/x-icon">
-</head>
-<body>
-    <div class="header">
-        <div class="header-text-container">
-          <h1 class="header-text">Donkey Travel</h1>
-        </div>
-      </div>
-    <div class="menu-container">
-        <button id="menu-button" class="menu-button">&#9776;</button>
-        <div class="menu">
-            <ul>
-                <li><a href="{% url 'index' %}">HomePage</a></li>
-                <li><a href="{% url 'guestdashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'staffdashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'account' %}">Account</a></li>
-                <li><a href="{% url 'login' %}">Login</a></li>
-                <li><a href="#" data-scroll="about-us" id="about-us-link">About us</a></li>
-            </ul>
-            <div class="menu-image">
-                <img src="{% static 'images/donkey.png' %}" alt="Image Description">
-            </div>
-        </div>
-    </div>
-    <div class="hero-container">
-        <div class="hero">
-            <video autoplay loop muted>
-                <source src="{% static 'images/donkey.mp4' %}" type="video/mp4">
-            </video>
+{% extends 'base.html' %}
 
-            <div class="hero-content">
-                <h1>Embark on a Donkey Adventure</h1>
-                <p>Experience the beauty of slow travel with DonkeyTravel.</p>
-                <a href="{% url 'bookingcreate' %}" class="cta-button">Book Your Donkey Adventure</a>
-            </div>
+{% load static %}
+{% block title %}Home{% endblock %}
+
+{% block header %}
+<div class="header">
+    <div class="header-text-container">
+        <h1 class="header-text">Donkey Travel</h1>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="hero-container">
+    <div class="hero">
+        <video autoplay loop muted>
+            <source src="{% static 'images/donkey.mp4' %}" type="video/mp4">
+        </video>
+
+        <div class="hero-content">
+            <h1>Embark on a Donkey Adventure</h1>
+            <p>Experience the beauty of slow travel with DonkeyTravel.</p>
+            <a href="{% url 'bookingcreate' %}" class="cta-button">Book Your Donkey Adventure</a>
         </div>
     </div>
-    <section id="about-us">
+</div>
+
+<section id="about-us">
     <div class="about-us">
-        <h2>About DonkeyTravel</h2>
-        <p>Welcome to DonkeyTravel, the world's premier donkey-based travel experience! At DonkeyTravel, we are passionate about connecting travelers with the simplicity, charm, and eco-friendliness of donkey journeys. 
-        Our story began with a vision to offer a unique and unforgettable travel experience that breaks away from conventional modes of transportation.</p>
-        
-        <h3>Our Story</h3>
-        <p>DonkeyTravel was founded in 2023 by a group of adventurous and nature-loving individuals who shared a common dream - to explore the world in a sustainable and authentic way. 
-        Inspired by the enduring spirit of donkeys, these animals have played an essential role in human history, providing reliable companionship and transportation for centuries. We wanted to bring back the magic of donkey travel in a modern and convenient way.</p>
-        
-        <h3>Our Mission</h3>
-        <p>At DonkeyTravel, we're on a mission to revolutionize the travel industry. We believe in traveling slowly, enjoying the journey, and forging a deeper connection with the places we visit. Our mission is to provide travelers with a fresh perspective on exploration, embracing the eco-friendly, low-impact nature of donkey travel.</p>
-        
-        <h3>Why Choose DonkeyTravel?</h3>
-        <ul>
-            <li>Unforgettable Adventures: With DonkeyTravel, every trip is an adventure. Whether you're winding through scenic countryside or exploring hidden trails, our donkey companions will make your journey unforgettable.</li>
-            <li>Sustainability: We are committed to responsible and sustainable travel. Donkeys have a minimal carbon footprint, and they tread lightly on the environment, making them the ideal mode of travel for eco-conscious explorers.</li>
-            <li>Local Connection: DonkeyTravel allows you to immerse yourself in the local culture. Travel at a leisurely pace and interact with people in a way that's often impossible with traditional transportation.</li>
-            <li>Tailored Experiences: We offer a range of trip options, from short day tours to extended adventures. You can choose the itinerary that suits your interests and desires.</li>
-            <li>Safety First: Our donkeys are well-trained, and your safety is our top priority. We provide guidance on how to interact with and care for your donkey companion.</li>
-        </ul>
-        
-        <p>Join Us on a Donkey Adventure</p>
-        <p>Are you ready to embark on a journey that's as much about the experience as the destination? DonkeyTravel invites you to explore the world in a unique, sustainable, and unforgettable way. Come, join us, and let the gentle and reliable donkey be your trusted travel companion.</p>
-        
-        <p>DonkeyTravel - Where Every Journey is a Story!</p>
-        <p>.</p>
-    </section>
+        <section id="about-us">
+            <div class="about-us">
+                <h2>About DonkeyTravel</h2>
+                <p>Welcome to DonkeyTravel, the world's premier donkey-based travel experience! At DonkeyTravel, we are passionate about connecting travelers with the simplicity, charm, and eco-friendliness of donkey journeys. 
+                Our story began with a vision to offer a unique and unforgettable travel experience that breaks away from conventional modes of transportation.</p>
+                
+                <h3>Our Story</h3>
+                <p>DonkeyTravel was founded in 2023 by a group of adventurous and nature-loving individuals who shared a common dream - to explore the world in a sustainable and authentic way. 
+                Inspired by the enduring spirit of donkeys, these animals have played an essential role in human history, providing reliable companionship and transportation for centuries. We wanted to bring back the magic of donkey travel in a modern and convenient way.</p>
+                
+                <h3>Our Mission</h3>
+                <p>At DonkeyTravel, we're on a mission to revolutionize the travel industry. We believe in traveling slowly, enjoying the journey, and forging a deeper connection with the places we visit. Our mission is to provide travelers with a fresh perspective on exploration, embracing the eco-friendly, low-impact nature of donkey travel.</p>
+                
+                <h3>Why Choose DonkeyTravel?</h3>
+                <ul>
+                    <li>Unforgettable Adventures: With DonkeyTravel, every trip is an adventure. Whether you're winding through scenic countryside or exploring hidden trails, our donkey companions will make your journey unforgettable.</li>
+                    <li>Sustainability: We are committed to responsible and sustainable travel. Donkeys have a minimal carbon footprint, and they tread lightly on the environment, making them the ideal mode of travel for eco-conscious explorers.</li>
+                    <li>Local Connection: DonkeyTravel allows you to immerse yourself in the local culture. Travel at a leisurely pace and interact with people in a way that's often impossible with traditional transportation.</li>
+                    <li>Tailored Experiences: We offer a range of trip options, from short day tours to extended adventures. You can choose the itinerary that suits your interests and desires.</li>
+                    <li>Safety First: Our donkeys are well-trained, and your safety is our top priority. We provide guidance on how to interact with and care for your donkey companion.</li>
+                </ul>
+                
+                <p>Join Us on a Donkey Adventure</p>
+                <p>Are you ready to embark on a journey that's as much about the experience as the destination? DonkeyTravel invites you to explore the world in a unique, sustainable, and unforgettable way. Come, join us, and let the gentle and reliable donkey be your trusted travel companion.</p>
+                
+                <p>DonkeyTravel - Where Every Journey is a Story!</p>
+                <p>.</p>
+            </section>
     </div>
-    <script src="{% static 'javascript/navbar.js' %}"></script>
-    <script src="{% static 'javascript/scroll.js' %}"></script>
-    <footer>
-        <div class="footer-content">
-            <p>&copy; 2023 DonkeyTravel. All rights reserved.</p>
-        </div>
-    </footer>
-    </body>
-</html>
+</section>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'javascript/scroll.js' %}"></script>
+{% endblock %}
