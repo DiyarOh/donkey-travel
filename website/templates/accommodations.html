@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accommodations</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="icon" href="{% static 'images/logo.jpg' %}" type="image/x-icon">
+</head>
+<body>
+    <div class="header">
+        <div class="header-text-container">
+          <h1 class="header-text">Make Accommodation</h1>
+        </div>
+      </div>
+    <div class="menu-container">
+        <button id="menu-button" class="menu-button">&#9776;</button>
+        <div class="menu">
+            <ul>
+                <li><a href="{% url 'index' %}">HomePage</a></li>
+                <li><a href="{% url 'guestdashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'staffdashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'account' %}">Account</a></li>
+                <li><a href="{% url 'login' %}">Login</a></li>
+                <li><a href="#" data-scroll="about-us" id="about-us-link">About us</a></li>
+            </ul>
+            <div class="menu-image">
+                <img src="{% static 'images/donkey.png' %}" alt="Image Description">
+            </div>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="Bookings-form-table">
+            <tr>
+                <td>Name:</td>
+                <td><input class="input-field" type="text" id="start-date"></td>
+                <td><button class="update-button">Update</button></td>
+            </tr>
+            <tr>
+                <td>Night stay possible:</td>
+                <td><input class="input-field" type="text" id="end-date"></td>
+                <td><button class="update-button">Update</button></td>
+            </tr>
+            <tr>
+                <td>number of seats:</td>
+                <td><input class="input-field" type="text" id="num-guests"></td>
+                <td><button class="update-button">Update</button></td>
+            </tr>
+            <tr>
+                <td>Status:</td>
+                <td><input class="input-field" type="text" id="pin"></td>
+                <td><button class="update-button">Update</button></td>
+            </tr>
+        </table>
+    </div>
+        <div class="button-container">
+                <button class="update-button">Create accommodation</button>
+        </div>
+    <script src="{% static 'javascript/navbar.js' %}"></script>
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2023 DonkeyTravel. All rights reserved.</p>
+        </div>
+    </footer>
+    </body>
+</html>

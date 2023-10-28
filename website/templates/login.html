@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        <link rel="icon" href="{% static 'images/logo.jpg' %}" type="image/x-icon">
+    </head>
+
+<body>
+<header>
+    <div class="logo-container">
+        <a href="{% url 'index' %}"> 
+            <img src="{% static 'images/logo.jpg' %}" alt="Logo">
+        </a>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        <h1>LOGIN</h1>
+        <div class="form-group">
+            <form method="POST" action="">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required><br><br>
+            <input type="submit" value="Login">
+            </form>
+        </div>
+        <div class="form-group register-link">
+            <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+        </div>
+    </div>
+</main>
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2023 DonkeyTravel. All rights reserved.</p>
+    </div>
+</footer>
+
+</body>
+</html>
