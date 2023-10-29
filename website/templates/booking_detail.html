@@ -21,8 +21,10 @@
     <p><strong>Status:</strong> {{ object.status.status }}</p>
     
     <div class="booking-buttons-container">
-    {% if object.status.deletable %}
+    {% if object.status.deletable or user.is_staff %}
         <a href="{% url 'booking_update' object.pk %}">Update Booking</a>
+    {% endif %}
+    {% if object.status.deletable %}
         <a href="{% url 'booking_delete' object.pk %}">Delete Booking</a>
     {% endif %}
     </div>

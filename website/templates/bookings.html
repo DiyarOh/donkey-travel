@@ -17,6 +17,11 @@
 <main class="container">
     <h2>Your Bookings:</h2>
     <div class="booking-container">
+        <a href="{% url 'bookingcreate' %}" >
+            <div class="booking-box">
+                <p><strong>Book Your Donkey Adventure</strong></p>
+            </div>
+        </a>
         {% for booking in bookings %}
             <a href="{% url 'booking_detail' booking.id %}">
                 <div class="booking-box">
