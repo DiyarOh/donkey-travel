@@ -1,3 +1,4 @@
+from django.contrib.gis.geos import Point
 from django.contrib.gis.db import models
 
 
@@ -12,6 +13,6 @@ class Route(models.Model):
 
 class Tracker(models.Model):
     pincode = models.CharField(max_length=10)
-    location = models.PointField(srid=4326)  # Store the geographic location as a PointField
-    time = models.DateTimeField()
-    booking = models.ForeignKey('website.Booking', on_delete=models.CASCADE, related_name='trackers')
+    location = models.PointField(srid=4326, default=Point(5.0453889387953135, 51.65060519815468))
+    time = models.DateTimeField(auto_now=True)
+    booking = models.ForeignKey('website.Booking',null=True, on_delete=models.CASCADE, related_name='trackers')

@@ -1,24 +1,22 @@
 from django.urls import path
-from website.views import HomepageView, BookingsView, MapView, AccountView, AccountLoginView, BookingCreateView, Bookings2View, ChangeRouteView, GuestDashboardView, GuestBookingsView, Map2View, RoutesView, StaffAccommodationsView, StaffBookingsView, StaffDashboardView, CreateBookingView, AccommodationsView, DeleteAccommodationsView
+from website.views import HomepageView, BookingDetailView,BookingUpdateView, BookingDeleteView, MapView, AccountView, AccountLoginView, BookingCreateView, ChangeRouteView, DashboardView, BookingsView, Map2View, RoutesView, StaffAccommodationsView, AccommodationsView, DeleteAccommodationsView
 
 
 urlpatterns = [
     path("", HomepageView.as_view(), name='index'),
+    path('booking/<int:pk>/', BookingDetailView.as_view(), name='booking_detail'),
+    path('booking/<int:pk>/update/', BookingUpdateView.as_view(), name='booking_update'),
+    path('booking/<int:pk>/delete/', BookingDeleteView.as_view(), name='booking_delete'),
+    path("bookingcreate/", BookingCreateView.as_view(), name='bookingcreate'),
     path("bookings/", BookingsView.as_view(), name='bookings'),
     path("map/", MapView.as_view(), name='map'),
     path("account/", AccountView.as_view(), name='account'),
     path("accountlogin/", AccountLoginView.as_view(), name='accountlogin'),
-    path("bookingcreate/", BookingCreateView.as_view(), name='bookingcreate'),
-    path("bookings2/", Bookings2View.as_view(), name='bookings2'),
     path("changeroute/", ChangeRouteView.as_view(), name='changeroute'),
-    path("guestdashboard/", GuestDashboardView.as_view(), name='guestdashboard'),
-    path("guestbookings/", GuestBookingsView.as_view(), name='guestbookings'),
+    path("dashboard/", DashboardView.as_view(), name='dashboard'),
     path("map2/", Map2View.as_view(), name='map2'),
     path("routes/", RoutesView.as_view(), name='routes'),
     path("staffaccommodations/", StaffAccommodationsView.as_view(), name='staffaccommodations'),
-    path("staffbookings/", StaffBookingsView.as_view(), name='staffbookings'),
-    path("staffdashboard/", StaffDashboardView.as_view(), name='staffdashboard'),
-    path("createbooking/", CreateBookingView.as_view(), name='createbooking'),
     path("accommodations/", AccommodationsView.as_view(), name='accommodations'),
     path("deleteaccommodations/", DeleteAccommodationsView.as_view(), name='deleteaccommodations'),
 ]

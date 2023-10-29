@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Booking{% endblock %}
+
+{% block header %}
+<div class="header-text-container">
+</div>
+<div class="header">
+    <div class="header-text-container">
+        <h1 class="header-text">Booking</h1>
+    </div>
+</div> 
+{% endblock %}
+{% block content %}
+<main class="container">
+    <div class="booking-page">
+    <h2>Booking Details</h2>
+    <p><strong>Start Date:</strong> {{ object.start_date }}</p>
+    <p><strong>Route:</strong> {{ object.route }}</p>
+    <p><strong>Status:</strong> {{ object.status.status }}</p>
+    
+    <div class="booking-buttons-container">
+    {% if object.status.deletable or user.is_staff %}
+        <a href="{% url 'booking_update' object.pk %}">Update Booking</a>
+    {% endif %}
+    {% if object.status.deletable %}
+        <a href="{% url 'booking_delete' object.pk %}">Delete Booking</a>
+    {% endif %}
+    </div>
+    </div>
+</main>
+{% endblock %}
