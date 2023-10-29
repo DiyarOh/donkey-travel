@@ -1,45 +1,36 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}My Bookings{% endblock %}
+{% block title %}Bookings{% endblock %}
 
 {% block header %}
+<div class="header-text-container">
+</div>
 <div class="header">
     <div class="header-text-container">
-        <h1 class="header-text">My Bookings</h1>
+        <h1 class="header-text">Bookings</h1>
     </div>
-</div>
+</div> 
 {% endblock %}
 
 {% block content %}
-<div class="table-container">
-    <table class="Bookings-form-table">
-        <tr>
-            <td>Start date:</td>
-            <td><input class="input-field" type="text" id="start-date"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>End date:</td>
-            <td><input class="input-field" type="text" id="end-date"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>Number of Guests:</td>
-            <td><input class="input-field" type="text" id="num-guests"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>Pin:</td>
-            <td><input class="input-field" type="text" id="pin"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>Status:</td>
-            <td><input class="input-field" type="text" id="status"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-    </table>
-    <button class="delete-button">Delete Booking</button>
-</div>
+<main class="container">
+    <h2>Your Bookings:</h2>
+    <div class="booking-container">
+        {% for booking in bookings %}
+            <a href="{% url 'booking_detail' booking.id %}">
+                <div class="booking-box">
+                    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+                    <p><strong>Route:</strong> {{ booking.route }}</p>
+                    <p><strong>Status:</strong> {{ booking.status.status }}</p>
+                    {% if request.user.is_staff %}
+                        <p><strong>Customer:</strong> {{ booking.customer.name }}</p>
+                    {% endif %}
+                </div>
+            </a>
+        {% empty %}
+            <p>No bookings found.</p>
+        {% endfor %}
+    </div>
+</main>
 {% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Update Booking{% endblock %}
+
+{% block header %}
+<div class="header-text-container">
+</div>
+<div class="header">
+    <div class="header-text-container">
+        <h1 class="header-text">Update Booking</h1>
+    </div>
+</div> 
+{% endblock %}
+{% block content %}
+<main class="container">
+    <div class="booking-page">
+    <h2>Update Booking</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+    <div class="booking-buttons-container">
+        <button class="submitbutton" type="submit">Update</button>
+    </div>
+</form>
+    </div>
+</main>
+{% endblock %}

@@ -2,6 +2,11 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from .models import Customer, Booking
+from navigation.models import Route
+
+
+class DateOnlyPickerWidget(forms.DateInput):
+    input_type = 'date'
 
 class RegistrationForm(forms.Form):
     username = forms.CharField(label="Username", max_length=100, required=True)
@@ -9,8 +14,8 @@ class RegistrationForm(forms.Form):
     first_name = forms.CharField(label="First Name", max_length=100, required=True)
     last_name = forms.CharField(label="Last Name", max_length=100, required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput(), required=True)
-    password_verify = forms.CharField(label="Confirm Password", widget=forms.PasswordInput(), required=True)  # New field for password verification
-    phone = forms.CharField(label="Phone", max_length=20, required=False)  # Add any additional fields
+    password_verify = forms.CharField(label="Confirm Password", widget=forms.PasswordInput(), required=True) 
+    phone = forms.CharField(label="Phone", max_length=20, required=False) 
 
     def clean(self):
         cleaned_data = super().clean()
@@ -40,7 +45,8 @@ class RegistrationForm(forms.Form):
             name=f"{first_name} {last_name}",
             email=email,
             phone=phone,
-            password=password
+            password=password,
+            user=user
         )
         customer.save()
 
@@ -50,7 +56,7 @@ class RegistrationForm(forms.Form):
 class CustomLoginForm(AuthenticationForm):
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)  # Get the 'request' from kwargs
+        self.request = kwargs.pop('request', None)
         super(CustomLoginForm, self).__init__(*args, **kwargs)
 
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
@@ -63,3 +69,26 @@ class BookingForm(forms.ModelForm):
         fields = ['start_date', 'route']
         
     start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+
+
+class BookingUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['start_date', 'route', 'status']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(BookingUpdateForm, self).__init__(*args, **kwargs)
+
+        if user and not user.is_staff:
+            # Exclude the 'status' field for non-staff users
+            self.fields.pop('status')
+        else: 
+            current_status = self.instance.status
+            self.initial['status'] = current_status
+            self.fields['status'].label_from_instance = lambda obj: obj.status
+            self.fields['status'].to_field_name = 'status'
+
+        self.fields['route'].choices = [(route.id, route) for route in Route.objects.all()]
+
+        self.fields['start_date'].widget = DateOnlyPickerWidget()

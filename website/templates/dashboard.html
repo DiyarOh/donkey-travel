@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Dashboard{% endblock %}
 
@@ -14,7 +15,7 @@
 
 {% block content %}
 <div class="dashboard-links">
-    <a href="{% url 'bookings2' %}">Bookings</a>
+    <a href="{% url 'bookings' %}">Bookings</a>
     <a href="/map">Map</a>
     <a href="/routes">Routes</a>
     <a href="/account">Account</a>

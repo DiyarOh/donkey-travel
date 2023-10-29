@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect
 
 from django.contrib.auth.models import User
-from django.views.generic import TemplateView
-from django.views.generic.edit import FormView
+from django.views.generic import TemplateView, DetailView
+from django.views.generic.edit import FormView, DeleteView, UpdateView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
-from .forms import RegistrationForm, CustomLoginForm, BookingForm
-from .models import Status
-from navigation.models import Tracker
+from django.urls import reverse_lazy
 
+from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm  
+from .models import Status, Booking
+from navigation.models import Tracker
 
 def custom_logout(request):
     if request.user.is_authenticated:
@@ -22,7 +23,7 @@ class HomepageView(TemplateView):
 
 class CustomLoginView(LoginView):
     template_name = "login.html"
-    authentication_form = CustomLoginForm  # Set your custom form
+    authentication_form = CustomLoginForm 
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
@@ -37,7 +38,7 @@ class RegisterView(FormView):
     success_url = ""
 
     def get(self, request):
-        form = RegistrationForm()  # Create an instance of the RegistrationForm
+        form = RegistrationForm()
         return render(request, self.template_name, {'form': form}) 
     
     def post(self, request):
@@ -46,8 +47,31 @@ class RegisterView(FormView):
             return redirect('index') 
 
 
-class BookingsView(FormView):
-    template_name = "bookings.html"
+class BookingDetailView(DetailView):
+    model = Booking
+    template_name = 'booking_detail.html'
+
+
+class BookingUpdateView(UpdateView):
+    model = Booking
+    form_class = BookingUpdateForm
+    template_name = 'booking_update.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_success_url(self):
+        return reverse_lazy('booking_detail', kwargs={'pk': self.object.pk})
+
+class BookingDeleteView(DeleteView):
+    model = Booking
+    success_url = reverse_lazy('your_bookings_list_view')
+    template_name = 'booking_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('bookings')
 
 
 class MapView(TemplateView):
@@ -97,12 +121,24 @@ class ChangeRouteView(TemplateView):
     template_name = "changeroute.html"
 
 
-class GuestDashboardView(TemplateView):
-    template_name = "guestdashboard.html"
+class DashboardView(TemplateView):
+    template_name = "dashboard.html"
 
 
-class GuestBookingsView(TemplateView):
-    template_name = "guestbookings.html"
+class BookingsView(TemplateView):
+    template_name = "bookings.html"
+
+    def dispatch(self, *args, **kwargs):
+        if self.request.user.is_staff:
+            # User is staff, so retrieve all bookings
+            bookings = Booking.objects.all()
+        else:
+            # User is not staff, so retrieve their own bookings
+            customer = self.request.user.customer
+            bookings = Booking.objects.filter(customer=customer)
+        
+        context = {'bookings': bookings}
+        return self.render_to_response(context)
 
 
 class Map2View(TemplateView):
