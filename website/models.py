@@ -1,13 +1,14 @@
 # Create your models here.
 from django.contrib.gis.db import models
+from django.contrib.auth.models import User
 
 class Booking(models.Model):
     start_date = models.DateField()
     pincode = models.CharField(max_length=10)
     route = models.ForeignKey('navigation.Route', on_delete=models.PROTECT)
     customer = models.ForeignKey('Customer', null=True, on_delete=models.SET_NULL)
-    status = models.ForeignKey('Status', on_delete=models.PROTECT)
-    tracker = models.ForeignKey('navigation.Tracker', on_delete=models.CASCADE, related_name='bookings')
+    status = models.ForeignKey('Status', default=0, on_delete=models.PROTECT)
+    tracker = models.ForeignKey('navigation.Tracker',null=True, on_delete=models.CASCADE, related_name='bookings')
 
     
 class Customer(models.Model):
@@ -16,6 +17,7 @@ class Customer(models.Model):
     phone = models.CharField(null=True, max_length=20)
     password = models.CharField(max_length=255)
     last_edited = models.DateTimeField(auto_now=True)
+    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
 
 
 class Inns(models.Model):

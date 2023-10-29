@@ -5,16 +5,20 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
-from .forms import RegistrationForm, CustomLoginForm
-
-class HomepageView(TemplateView):
-    template_name = "index.html"
+from .forms import RegistrationForm, CustomLoginForm, BookingForm
+from .models import Status
+from navigation.models import Tracker
 
 
 def custom_logout(request):
     if request.user.is_authenticated:
         logout(request)
     return redirect('login')
+
+
+class HomepageView(TemplateView):
+    template_name = "index.html"
+
 
 class CustomLoginView(LoginView):
     template_name = "login.html"
@@ -25,6 +29,7 @@ class CustomLoginView(LoginView):
         # Add additional context data as needed
         context['custom_data'] = "Additional Data"
         return render(request, self.template_name, context)
+
 
 class RegisterView(FormView):
     template_name = "register.html"
@@ -40,7 +45,8 @@ class RegisterView(FormView):
         if form.is_valid():
             return redirect('index') 
 
-class BookingsView(TemplateView):
+
+class BookingsView(FormView):
     template_name = "bookings.html"
 
 
@@ -56,9 +62,32 @@ class AccountLoginView(TemplateView):
     template_name = "accountlogin.html"
 
 
-class BookingCreateView(TemplateView):
+class BookingCreateView(FormView):
     template_name = "bookingcreate.html"
+    
+    def get (self, request):
+        form = BookingForm()
+        return render(request, self.template_name, {'form': form})
+        
+    def post(self, request):
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.customer = self.request.user.customer
+            default_status = Status.objects.get(status_code=0)
+            booking.status = default_status
+            booking.save()
+            tracker = Tracker.objects.create(pincode='0000', booking=booking)
+            tracker.save()
+            booking.tracker = tracker
+            booking.save()
+            return redirect('index')
 
+        return render(request, self.template_name, {'form': form})
+
+
+    def get_success_url(self):
+        return redirect('index')
 
 class Bookings2View(TemplateView):
     template_name = "bookings2.html"

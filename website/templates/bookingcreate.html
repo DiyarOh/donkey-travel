@@ -12,27 +12,16 @@
 {% endblock %}
 
 {% block content %}
-<div class="table-container">
-    <table class="Bookings-form-table">
-        <tr>
-            <td>Start date:</td>
-            <td><input class="input-field" type="text" id="start-date"></td>
-        </tr>
-        <tr>
-            <td>End date:</td>
-            <td><input class="input-field" type="text" id="end-date"></td>
-        </tr>
-        <tr>
-            <td>Number of Guests:</td>
-            <td><input class="input-field" type="text" id="num-guests"></td>
-        </tr>
-        <tr>
-            <td>Pin:</td>
-            <td><input class="input-field" type="text" id="pin"></td>
-        </tr>
-    </table>
-</div>
-<div class="button-container">
-    <button class="update-button">Create Booking</button>
-</div>
+    <form method="post" action="{% url 'bookingcreate' %}">
+        <div class="table-container">
+            {% csrf_token %}
+            <table class="Bookings-form-table">
+                {{ form.as_table }}
+            </table>
+        </div>
+        <div class="button-container">
+            <button class="update-button">Create Booking</button>
+        </div>
+    </form>
+   
 {% endblock %}
