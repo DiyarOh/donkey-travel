@@ -1,14 +1,16 @@
 from django.shortcuts import render, redirect
+from django.db.utils import IntegrityError
 
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView, DetailView
 from django.views.generic.edit import FormView, DeleteView, UpdateView
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib.auth import logout
 from django.urls import reverse_lazy
+from django.db import transaction
 
-from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm  
-from .models import Status, Booking
+from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm, AccountUpdateForm
+from .models import Status, Booking, Customer
 from navigation.models import Tracker
 
 def custom_logout(request):
@@ -44,8 +46,46 @@ class RegisterView(FormView):
     def post(self, request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            return redirect('index') 
+            try:
+                # Try to create a new user
+                with transaction.atomic():
+                    user = User.objects.create_user(username=form.cleaned_data['username'], password=form.cleaned_data['password'], email=form.cleaned_data['email'], first_name=form.cleaned_data['first_name'], last_name=form.cleaned_data['last_name'])
+                    customer = Customer.objects.create(user=user, email=form.cleaned_data['email'], phone=form.cleaned_data['phone'], name=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']} ")
+                return redirect('index') 
+            except IntegrityError as e:
+                if 'unique constraint "auth_user_username_key"' in str(e):
+                    # Handle duplicate username error
+                    error_message = "A user with this username already exists. Please choose a different username."
+                    form.add_error('username', error_message)
+                elif 'unique constraint "app_customer_email_key"' in str(e):
+                    # Handle duplicate email error
+                    error_message = "This email address is already registered. Please use a different email."
+                    form.add_error('email', error_message)
+                elif 'unique constraint "app_customer_phone_key"' in str(e):
+                    # Handle duplicate phone number error
+                    error_message = "This phone number is already registered. Please use a different phone number."
+                    form.add_error('phone', error_message)
+                return render(request, self.template_name, {'form': form})
+        else:
+            # Form validation errors: Display the form with errors
+            return render(request, self.template_name, {'form': form})
 
+
+class BookingsView(TemplateView):
+    template_name = "bookings.html"
+
+    def dispatch(self, *args, **kwargs):
+        if self.request.user.is_staff:
+            # User is staff, so retrieve all bookings
+            bookings = Booking.objects.all()
+        else:
+            # User is not staff, so retrieve their own bookings
+            customer = self.request.user.customer
+            bookings = Booking.objects.filter(customer=customer)
+        
+        context = {'bookings': bookings}
+        return self.render_to_response(context)
+    
 
 class BookingDetailView(DetailView):
     model = Booking
@@ -72,18 +112,6 @@ class BookingDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('bookings')
-
-
-class MapView(TemplateView):
-    template_name = "map.html"
-
-
-class AccountView(TemplateView):
-    template_name = "account.html"
-
-
-class AccountLoginView(TemplateView):
-    template_name = "accountlogin.html"
 
 
 class BookingCreateView(FormView):
@@ -113,9 +141,6 @@ class BookingCreateView(FormView):
     def get_success_url(self):
         return redirect('index')
 
-class Bookings2View(TemplateView):
-    template_name = "bookings2.html"
-
 
 class ChangeRouteView(TemplateView):
     template_name = "changeroute.html"
@@ -123,22 +148,6 @@ class ChangeRouteView(TemplateView):
 
 class DashboardView(TemplateView):
     template_name = "dashboard.html"
-
-
-class BookingsView(TemplateView):
-    template_name = "bookings.html"
-
-    def dispatch(self, *args, **kwargs):
-        if self.request.user.is_staff:
-            # User is staff, so retrieve all bookings
-            bookings = Booking.objects.all()
-        else:
-            # User is not staff, so retrieve their own bookings
-            customer = self.request.user.customer
-            bookings = Booking.objects.filter(customer=customer)
-        
-        context = {'bookings': bookings}
-        return self.render_to_response(context)
 
 
 class Map2View(TemplateView):
@@ -153,14 +162,6 @@ class StaffAccommodationsView(TemplateView):
     template_name = "staffaccommodations.html"
 
 
-class StaffBookingsView(TemplateView):
-    template_name = "staffbookings.html"
-
-
-class StaffDashboardView(TemplateView):
-    template_name = "staffdashboard.html"
-
-
 class CreateBookingView(TemplateView):
     template_name = "createbooking.html"
 
@@ -171,3 +172,23 @@ class AccommodationsView(TemplateView):
 
 class DeleteAccommodationsView(TemplateView):
     template_name = "deleteaccommodations.html"
+    
+
+class MapView(TemplateView):
+    template_name = "map.html"
+
+
+class AccountView(UpdateView):
+    model = Customer
+    form_class = AccountUpdateForm
+    template_name = "account.html"
+
+    def get_success_url(self):
+        return reverse_lazy('account', kwargs={'pk': self.object.pk})
+
+
+class AccountDeleteView(DeleteView):
+    model = User
+    success_url = reverse_lazy('logout')
+    template_name = 'account_confirm_delete.html'
+    

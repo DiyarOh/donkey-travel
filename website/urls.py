@@ -1,5 +1,9 @@
 from django.urls import path
-from website.views import HomepageView, BookingDetailView,BookingUpdateView, BookingDeleteView, MapView, AccountView, AccountLoginView, BookingCreateView, ChangeRouteView, DashboardView, BookingsView, Map2View, RoutesView, StaffAccommodationsView, AccommodationsView, DeleteAccommodationsView
+from django.urls import reverse_lazy
+
+from django.contrib.auth.views import PasswordChangeView
+
+from website.views import HomepageView, BookingDetailView,BookingUpdateView, BookingDeleteView, MapView, AccountView, AccountDeleteView, BookingCreateView, ChangeRouteView, DashboardView, BookingsView, Map2View, RoutesView, StaffAccommodationsView, AccommodationsView, DeleteAccommodationsView
 
 
 urlpatterns = [
@@ -10,8 +14,9 @@ urlpatterns = [
     path("bookingcreate/", BookingCreateView.as_view(), name='bookingcreate'),
     path("bookings/", BookingsView.as_view(), name='bookings'),
     path("map/", MapView.as_view(), name='map'),
-    path("account/", AccountView.as_view(), name='account'),
-    path("accountlogin/", AccountLoginView.as_view(), name='accountlogin'),
+    path('account/<int:pk>/', AccountView.as_view(), name='account'),
+    path('account_delete/<int:pk>/', AccountDeleteView.as_view(), name='account_delete'),
+    path('change-password/', PasswordChangeView.as_view(template_name='change_password.html', success_url=reverse_lazy('index')), name='password_change'),
     path("changeroute/", ChangeRouteView.as_view(), name='changeroute'),
     path("dashboard/", DashboardView.as_view(), name='dashboard'),
     path("map2/", Map2View.as_view(), name='map2'),
