@@ -12,39 +12,17 @@
 {% endblock %}
 
 {% block content %}
+<form method="post">
 <div class="table-container">
     <table class="Bookings-form-table">
-        <tr>
-            <td>First Name:</td>
-            <td><input class="input-field" type="text" id="start-date"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>Last Name:</td>
-            <td><input class="input-field" type="text" id="end-date"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>Date of birth:</td>
-            <td><input class="input-field" type="text" id="num-guests"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>Email:</td>
-            <td><input class="input-field" type="text" id="pin"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
-        <tr>
-            <td>Username:</td>
-            <td><input class="input-field" type="text" id="status"></td>
-            <td><button class="update-button">Update</button></td>
-        </tr>
+        {% csrf_token %}
+        {{ form.as_table }}
     </table>
 </div>
 <div class="button-container">
-    <a href="{% url 'accountlogin' %}">
-        <button class="update-button2">Change Password</button>
-    </a>
-    <button class="delete-button2">Delete Account</button>
+    <a class="update-button2" href="{% url 'password_change' %}">Change Password</a>
+    <button type="submit" class="update-button">Update</button>
+    <a class="delete-button2" href="{% url 'account_delete' user.pk %}">Delete Account</a>
 </div>
+</form>
 {% endblock %}

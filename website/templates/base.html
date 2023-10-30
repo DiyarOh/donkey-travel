@@ -22,7 +22,9 @@
             <ul>
                 <li><a href="{% url 'index' %}">HomePage</a></li>
                 <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'account' %}">Account</a></li>
+                {% if user.customer.pk %}
+                <li><a href="{% url 'account' user.customer.pk %}">Account</a></li>
+                {% endif %}
                 <li><a href="{% url 'logout' %}">Log out</a></li>
                 <li><a href="#" data-scroll="about-us" id="about-us-link">About us</a></li>
             </ul>
