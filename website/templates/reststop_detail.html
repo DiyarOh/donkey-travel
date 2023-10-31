@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}RestStop{% endblock %}
+
+{% block header %}
+<div class="header-text-container">
+</div>
+<div class="header">
+    <div class="header-text-container">
+        <h1 class="header-text">RestStop</h1>
+    </div>
+</div> 
+{% endblock %}
+{% block content %}
+<main class="container">
+    <div class="booking-page">
+    <h2>RestStop Details</h2>
+    <p><strong>Start Date:</strong> {{ object.restaurant }}</p>
+    <p><strong>Route:</strong> {{ object.booking }}</p>
+    <p><strong>Status:</strong> {{ object.status.status }}</p>
+    
+    <div class="booking-buttons-container">
+    {% if object.status.deletable or user.is_staff %}
+        <a href="{% url 'reststop_update' object.pk %}">Update RestStop</a>
+    {% endif %}
+    {% if object.status.deletable %}
+        <a href="{% url 'reststop_delete' object.pk %}">Delete RestStop</a>
+    {% endif %}
+    </div>
+    </div>
+</main>
+{% endblock %}

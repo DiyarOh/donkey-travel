@@ -4,14 +4,14 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView, DetailView, View
-from django.views.generic.edit import FormView, DeleteView, UpdateView
+from django.views.generic.edit import FormView, DeleteView, UpdateView, CreateView
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib.auth import logout
 from django.urls import reverse_lazy
 from django.db import transaction
 
-from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm, AccountUpdateForm, InnsForm, InnsUpdateForm, RestaurantForm, RestaurantUpdateForm
-from .models import Status, Booking, Customer, Inns, Restaurant
+from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm, AccountUpdateForm, InnsForm, InnsUpdateForm, RestaurantForm, RestaurantUpdateForm, OvernightStayForm, RestStopForm, RestStopUpdateForm, OvernightStayUpdateForm
+from .models import Status, Booking, Customer, Inns, Restaurant, RestStop, OvernightStay
 from navigation.models import Tracker
 
 def custom_logout(request):
@@ -78,14 +78,22 @@ class BookingsView(TemplateView):
         if self.request.user.is_staff:
             # User is staff, so retrieve all bookings
             bookings = Booking.objects.all()
+            reststops = RestStop.objects.all()
+            overnightstays = OvernightStay.objects.all()
         else:
             # User is not staff, so retrieve their own bookings
             customer = self.request.user.customer
             bookings = Booking.objects.filter(customer=customer)
-        
-        context = {'bookings': bookings}
+            reststops = RestStop.objects.filter(booking__customer=customer)
+            overnightstays = OvernightStay.objects.filter(booking__customer=customer)
+
+        context = {
+            'bookings': bookings,
+            'reststops': reststops,
+            'overnightstays': overnightstays,
+        }
         return self.render_to_response(context)
-    
+
 
 class BookingDetailView(DetailView):
     model = Booking
@@ -133,13 +141,13 @@ class BookingCreateView(FormView):
             tracker.save()
             booking.tracker = tracker
             booking.save()
-            return redirect('index')
+            return redirect('bookings')
 
         return render(request, self.template_name, {'form': form})
 
 
     def get_success_url(self):
-        return redirect('index')
+        return redirect('bookings')
 
 
 class ChangeRouteView(TemplateView):
@@ -279,3 +287,91 @@ class RestaurantDeleteView(DeleteView):
     model = Restaurant
     success_url = reverse_lazy('list_accommodations')
     template_name = 'restaurant_confirm_delete.html'
+
+
+    
+class OvernightDetailView(DetailView):
+    model = OvernightStay
+    template_name = 'overnightstay_detail.html'
+
+
+class ReststopDetailView(DetailView):
+    model = RestStop
+    template_name = 'reststop_detail.html'
+
+
+
+class OvernightStayCreateView(CreateView):
+    model = OvernightStay
+    form_class = OvernightStayForm 
+    template_name = 'overnightstay_form.html'
+
+    def get_success_url(self):
+        return reverse_lazy('bookings') 
+    def form_valid(self, form):
+        form.instance.booking.customer = self.request.user.customer
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user 
+        return kwargs
+class RestStopCreateView(CreateView):
+    model = RestStop
+    form_class = RestStopForm  
+    template_name = 'reststop_form.html' 
+
+    def get_success_url(self):
+        return reverse_lazy('bookings')
+
+    def form_valid(self, form):
+        form.instance.booking.customer = self.request.user.customer
+        return super().form_valid(form)
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  
+        return kwargs
+
+
+class OvernightStayUpdateView(UpdateView):
+    model = OvernightStay
+    form_class = OvernightStayUpdateForm
+    template_name = 'update_page.html'
+
+    def get_success_url(self):
+        return reverse_lazy('bookings')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  # Pass the user to the form
+        return kwargs
+
+
+class RestStopUpdateView(UpdateView):
+    model = RestStop
+    form_class = RestStopUpdateForm
+    template_name = 'update_page.html'
+
+    def get_success_url(self):
+        return reverse_lazy('bookings')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  # Pass the user to the form
+        return kwargs
+
+class OvernightStayDeleteView(DeleteView):
+    model = OvernightStay
+    template_name = 'confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('bookings')
+
+
+class RestStopDeleteView(DeleteView):
+    model = RestStop
+    template_name = 'confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('bookings')

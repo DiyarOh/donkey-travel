@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}OvernightStay{% endblock %}
+
+{% block header %}
+<div class="header-text-container">
+</div>
+<div class="header">
+    <div class="header-text-container">
+        <h1 class="header-text">OvernightStay</h1>
+    </div>
+</div> 
+{% endblock %}
+{% block content %}
+<main class="container">
+    <div class="booking-page">
+    <h2>OvernightStay Details</h2>
+    <p><strong>Inn:</strong> {{ object.inn }}</p>
+    <p><strong>Booking:</strong> {{ object.booking }}</p>
+    <p><strong>Status:</strong> {{ object.status.status }}</p>
+    
+    <div class="booking-buttons-container">
+    {% if object.status.deletable or user.is_staff %}
+        <a href="{% url 'overnightstay_update' object.pk %}">Update OvernightStay</a>
+    {% endif %}
+    {% if object.status.deletable %}
+        <a href="{% url 'overnightstay_delete' object.pk %}">Delete OvernightStay</a>
+    {% endif %}
+    </div>
+    </div>
+</main>
+{% endblock %}
