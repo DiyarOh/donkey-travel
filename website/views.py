@@ -1,16 +1,17 @@
 from django.shortcuts import render, redirect
 from django.db.utils import IntegrityError
+from django.contrib.gis.geos import GEOSGeometry
 
 from django.contrib.auth.models import User
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import TemplateView, DetailView, View
 from django.views.generic.edit import FormView, DeleteView, UpdateView
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib.auth import logout
 from django.urls import reverse_lazy
 from django.db import transaction
 
-from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm, AccountUpdateForm
-from .models import Status, Booking, Customer
+from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm, AccountUpdateForm, InnsForm, InnsUpdateForm, RestaurantForm, RestaurantUpdateForm
+from .models import Status, Booking, Customer, Inns, Restaurant
 from navigation.models import Tracker
 
 def custom_logout(request):
@@ -29,7 +30,6 @@ class CustomLoginView(LoginView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
-        # Add additional context data as needed
         context['custom_data'] = "Additional Data"
         return render(request, self.template_name, context)
 
@@ -191,4 +191,91 @@ class AccountDeleteView(DeleteView):
     model = User
     success_url = reverse_lazy('logout')
     template_name = 'account_confirm_delete.html'
+
+
+
+class CreateInnView(FormView):
+    template_name = 'create_inn.html'
+
+    def get(self, request):
+        form = InnsForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = InnsForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data['coordinates'])
+            inn = form.save(commit=False)
+            inn.coordinates = GEOSGeometry(form.cleaned_data['coordinates'])
+            inn.save()
+            return redirect('list_accommodations')
+        return render(request, self.template_name, {'form': form})
     
+
+class InnsUpdateView(UpdateView):
+    model = Inns
+    form_class = InnsUpdateForm
+    template_name = 'update_inn.html'
+    success_url = reverse_lazy('list_accommodations')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        instance = self.get_object()
+        if instance.coordinates:
+            form.fields['coordinates'].widget.existing_lat = instance.coordinates.y
+            form.fields['coordinates'].widget.existing_lng = instance.coordinates.x
+        return form
+
+
+class InnDeleteView(DeleteView):
+    model = Inns
+    success_url = reverse_lazy('list_accommodations')
+    template_name = 'inn_confirm_delete.html'
+
+
+class ListAccommodationsView(View):
+    template_name = 'list_accommodations.html'
+
+    def get(self, request):
+        inns = Inns.objects.all()
+        restaurants = Restaurant.objects.all()
+        return render(request, self.template_name, {'inns': inns, 'restaurants': restaurants})
+
+
+class CreateRestaurantView(FormView):
+    template_name = 'create_restaurant.html'
+
+    def get(self, request):
+        form = RestaurantForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = RestaurantForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data['coordinates'])
+            inn = form.save(commit=False)
+            inn.coordinates = GEOSGeometry(form.cleaned_data['coordinates'])
+            inn.save()
+            return redirect('list_accommodations')
+        return render(request, self.template_name, {'form': form})
+    
+
+class RestaurantUpdateView(UpdateView):
+    model = Restaurant
+    form_class = RestaurantUpdateForm
+    template_name = 'update_restaurant.html'
+    success_url = reverse_lazy('list_accommodations')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        instance = self.get_object()
+        if instance.coordinates:
+            form.fields['coordinates'].widget.existing_lat = instance.coordinates.y
+            form.fields['coordinates'].widget.existing_lng = instance.coordinates.x
+        return form
+
+
+class RestaurantDeleteView(DeleteView):
+    model = Restaurant
+    success_url = reverse_lazy('list_accommodations')
+    template_name = 'restaurant_confirm_delete.html'
