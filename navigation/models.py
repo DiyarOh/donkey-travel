@@ -4,8 +4,8 @@ from django.contrib.gis.db import models
 
 class Route(models.Model):
     description = models.TextField(default='NoNameRoute')
-    route = models.LineStringField()  # Assuming you want to store a route as a LineString
-    duration_in_days = models.PositiveIntegerField(default=4) # LineStringField to store the coordinates
+    route = models.LineStringField() 
+    duration_in_days = models.PositiveIntegerField(default=4) 
 
     def __str__(self):
         return self.description
