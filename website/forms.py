@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.gis.geos import Point
 
 
-from .models import Customer, Booking, Inns
+from .models import Customer, Booking, Inns, Restaurant
 from navigation.models import Route
 from .validators import validate_phonenumber
 
@@ -179,4 +179,49 @@ class InnsUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Inns
+        exclude = ['last_edited']
+
+    
+class RestaurantForm(forms.ModelForm):
+    address = forms.CharField(
+        widget=forms.TextInput(attrs={'size': '30'}),
+        label='Address'
+    )
+    coordinates = gis_forms.PointField(srid=4326, widget=CustomMapWidget(attrs={'map_width': 800, 'map_height': 500}))
+
+    class Meta:
+        model = Restaurant
+        exclude = ['last_edited']
+
+    def clean_coordinates(self):
+        coordinates = self.cleaned_data['coordinates']
+
+        if coordinates:
+            lat = coordinates.y
+            lng = coordinates.x
+
+        return coordinates
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.coordinates = self.cleaned_data.get('coordinates')
+        
+        if commit:
+            instance.save()
+        
+        return instance
+    
+
+class RestaurantUpdateForm(forms.ModelForm):
+    address = forms.CharField(
+        widget=forms.TextInput(attrs={'size': '30'}),
+        label='Address'
+    )
+    coordinates = gis_forms.PointField(
+        srid=4326,
+        widget=CustomMapWidget(attrs={'map_width': 800, 'map_height': 500})
+    )
+
+    class Meta:
+        model = Restaurant
         exclude = ['last_edited']

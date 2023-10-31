@@ -9,7 +9,8 @@ from website.views import (
     BookingCreateView, ChangeRouteView, DashboardView, BookingsView, 
     Map2View, RoutesView, StaffAccommodationsView, AccommodationsView, 
     DeleteAccommodationsView, ListAccommodationsView, CreateInnView,
-    InnsUpdateView, InnDeleteView,
+    InnsUpdateView, InnDeleteView, CreateRestaurantView,
+    RestaurantDeleteView, RestaurantUpdateView
     )
 
 
@@ -20,10 +21,13 @@ urlpatterns = [
     path('booking/<int:pk>/delete/', BookingDeleteView.as_view(), name='booking_delete'),
     path("bookingcreate/", BookingCreateView.as_view(), name='bookingcreate'),
     path("bookings/", BookingsView.as_view(), name='bookings'),
-    path('list-inns/', ListAccommodationsView.as_view(), name='list_accommodations'),
+    path('accommodations/', ListAccommodationsView.as_view(), name='list_accommodations'),
     path('create-inn/', CreateInnView.as_view(), name='create_inn'),
     path('update_inn/<int:pk>/', InnsUpdateView.as_view(), name='update_inn'),
     path('inn/<int:pk>/delete/', InnDeleteView.as_view(), name='inn_delete'),
+    path('create-restaurant/', CreateRestaurantView.as_view(), name='create_restaurant'),
+    path('update_restaurant/<int:pk>/', RestaurantUpdateView.as_view(), name='update_restaurant'),
+    path('restaurant/<int:pk>/delete/', RestaurantDeleteView.as_view(), name='restaurant_delete'),
     path("map/", MapView.as_view(), name='map'),
     path('account/<int:pk>/', AccountView.as_view(), name='account'),
     path('account_delete/<int:pk>/', AccountDeleteView.as_view(), name='account_delete'),

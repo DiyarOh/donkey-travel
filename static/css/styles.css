@@ -220,6 +220,16 @@ td .errorlist li {
   margin-bottom: 1em;
 }
 
+.list_container ul li a {
+  color: black;
+  text-decoration: none;
+}
+
+
+.list_container ul li a::after {
+  color: black;
+  text-decoration: none;
+}
 
 /* End of what Diyar added */
 html{

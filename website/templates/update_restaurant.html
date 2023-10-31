@@ -6,25 +6,26 @@
     {{ geoform.media }}
 {% endblock %}
 
-{% block title %}Update Inn{% endblock %}
+{% block title %}Update Restaurant{% endblock %}
 
 {% block header %}
 <div class="header">
     <div class="header-text-container">
-        <h1 class="header-text">Inn</h1>
+        <h1 class="header-text">Restaurant</h1>
     </div>
 </div>
 {% endblock %}
+
 {% block content %}
 <main class="container">
     <div class="booking-page">
-        <h2>Update Inn</h2>
+        <h2>Update Restaurant</h2>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <div class="booking-buttons-container">
-                <button class="update-button2" type="submit">Update Inn</button>
-                <a href="{% url 'inn_delete' object.pk %}">Delete Inn</a>
+                <button class="update-button2" type="submit">Update Restaurant</button>
+                <a href="{% url 'restaurant_delete' object.pk %}">Delete Restaurant</a>
                 <a href="{% url 'list_accommodations' %}">Back to List</a>
             </div>
         </form>

@@ -10,7 +10,7 @@ from django.contrib.auth import logout
 from django.urls import reverse_lazy
 from django.db import transaction
 
-from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm, AccountUpdateForm, InnsForm, InnsUpdateForm
+from .forms import RegistrationForm, CustomLoginForm, BookingForm, BookingUpdateForm, AccountUpdateForm, InnsForm, InnsUpdateForm, RestaurantForm, RestaurantUpdateForm
 from .models import Status, Booking, Customer, Inns, Restaurant
 from navigation.models import Tracker
 
@@ -240,3 +240,42 @@ class ListAccommodationsView(View):
         inns = Inns.objects.all()
         restaurants = Restaurant.objects.all()
         return render(request, self.template_name, {'inns': inns, 'restaurants': restaurants})
+
+
+class CreateRestaurantView(FormView):
+    template_name = 'create_restaurant.html'
+
+    def get(self, request):
+        form = RestaurantForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = RestaurantForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data['coordinates'])
+            inn = form.save(commit=False)
+            inn.coordinates = GEOSGeometry(form.cleaned_data['coordinates'])
+            inn.save()
+            return redirect('list_accommodations')
+        return render(request, self.template_name, {'form': form})
+    
+
+class RestaurantUpdateView(UpdateView):
+    model = Restaurant
+    form_class = RestaurantUpdateForm
+    template_name = 'update_restaurant.html'
+    success_url = reverse_lazy('list_accommodations')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        instance = self.get_object()
+        if instance.coordinates:
+            form.fields['coordinates'].widget.existing_lat = instance.coordinates.y
+            form.fields['coordinates'].widget.existing_lng = instance.coordinates.x
+        return form
+
+
+class RestaurantDeleteView(DeleteView):
+    model = Restaurant
+    success_url = reverse_lazy('list_accommodations')
+    template_name = 'restaurant_confirm_delete.html'

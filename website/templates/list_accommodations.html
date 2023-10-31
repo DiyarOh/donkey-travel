@@ -1,5 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
 
+{% block title %}Accommodations{% endblock %}
+
+{% block header %}
+<div class="header">
+    <div class="header-text-container">
+        <h1 class="header-text">Accommodations</h1>
+    </div>
+</div>
+{% endblock %}
 {% block content %}
 <main class="container">
     <h2>List of Accommodations</h2>
@@ -23,7 +33,7 @@
                 <li>No restaurants found.</li>
             {% endfor %}
             {# Add a link to create a restaurant if needed #}
-            {% comment %} <a class="update-button2" href="{% url 'create_restaurant' %}">Create Restaurant</a> {% endcomment %}
+            <a class="update-button2" href="{% url 'create_restaurant' %}">Create Restaurant</a>
         </ul>
     </div>
 </main>
