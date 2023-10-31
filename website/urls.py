@@ -10,7 +10,10 @@ from website.views import (
     Map2View, RoutesView, StaffAccommodationsView, AccommodationsView, 
     DeleteAccommodationsView, ListAccommodationsView, CreateInnView,
     InnsUpdateView, InnDeleteView, CreateRestaurantView,
-    RestaurantDeleteView, RestaurantUpdateView
+    RestaurantDeleteView, RestaurantUpdateView,RestStopCreateView, 
+    OvernightStayCreateView, ReststopDetailView, OvernightDetailView,
+    RestStopDeleteView, RestStopUpdateView, OvernightStayDeleteView,
+    OvernightStayUpdateView
     )
 
 
@@ -28,6 +31,14 @@ urlpatterns = [
     path('create-restaurant/', CreateRestaurantView.as_view(), name='create_restaurant'),
     path('update_restaurant/<int:pk>/', RestaurantUpdateView.as_view(), name='update_restaurant'),
     path('restaurant/<int:pk>/delete/', RestaurantDeleteView.as_view(), name='restaurant_delete'),
+    path('reststop/create/', RestStopCreateView.as_view(), name='reststop_create'),
+    path('reststop/<int:pk>/', ReststopDetailView.as_view(), name='reststop_detail'),
+    path('overnightstay/<int:pk>/', OvernightDetailView.as_view(), name='overnightstay_detail'),
+    path('overnightstay/create/', OvernightStayCreateView.as_view(), name='overnightstay_create'),
+    path('overnightstay/<int:pk>/update/', OvernightStayUpdateView.as_view(), name='overnightstay_update'),
+    path('overnightstay/<int:pk>/delete/', OvernightStayDeleteView.as_view(), name='overnightstay_delete'),
+    path('reststop/<int:pk>/update/', RestStopUpdateView.as_view(), name='reststop_update'),
+    path('reststop/<int:pk>/delete/', RestStopDeleteView.as_view(), name='reststop_delete'),
     path("map/", MapView.as_view(), name='map'),
     path('account/<int:pk>/', AccountView.as_view(), name='account'),
     path('account_delete/<int:pk>/', AccountDeleteView.as_view(), name='account_delete'),
@@ -36,7 +47,4 @@ urlpatterns = [
     path("dashboard/", DashboardView.as_view(), name='dashboard'),
     path("map2/", Map2View.as_view(), name='map2'),
     path("routes/", RoutesView.as_view(), name='routes'),
-    path("staffaccommodations/", StaffAccommodationsView.as_view(), name='staffaccommodations'),
-    path("accommodations/", AccommodationsView.as_view(), name='accommodations'),
-    path("deleteaccommodations/", DeleteAccommodationsView.as_view(), name='deleteaccommodations'),
 ]

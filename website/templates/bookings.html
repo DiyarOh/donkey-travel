@@ -17,11 +17,12 @@
 <main class="container">
     <h2>Your Bookings:</h2>
     <div class="booking-container">
-        <a href="{% url 'bookingcreate' %}" >
+        <a href="{% url 'bookingcreate' %}">
             <div class="booking-box">
                 <p><strong>Book Your Donkey Adventure</strong></p>
             </div>
         </a>
+        <h3>Bookings:</h3>
         {% for booking in bookings %}
             <a href="{% url 'booking_detail' booking.id %}">
                 <div class="booking-box">
@@ -36,6 +37,43 @@
         {% empty %}
             <p>No bookings found.</p>
         {% endfor %}
-    </div>
+    </div>    
+    <div class="booking-container">
+        <a href="{% url 'reststop_create' %}">
+            <div class="booking-box">
+                <p><strong>Book Your Rest stop</strong></p>
+            </div>
+        </a>
+        <h3>Rest Stops:</h3>
+        {% for reststop in reststops %}
+            <a href="{% url 'reststop_detail' reststop.id %}">
+                <div class="booking-box">
+                    <p><strong>Restaurant:</strong> {{ reststop.restaurant }}</p>
+                    <p><strong>Booking:</strong> {{ reststop.booking }}</p>           
+                </div>
+            </a>
+        {% empty %}
+            <p>No rest stops found.</p>
+        {% endfor %}
+    </div>    
+    <div class="booking-container">
+        <a href="{% url 'overnightstay_create' %}">
+            <div class="booking-box">
+                <p><strong>Book Your Overnight stay</strong></p>
+            </div>
+        </a>
+        <h3>Overnight Stays:</h3>
+        {% for overnightstay in overnightstays %}
+            <a href="{% url 'overnightstay_detail' overnightstay.id %}">
+                <div class="booking-box">
+                    <p><strong>Inn:</strong> {{ overnightstay.inn }}</p>
+                    <p><strong>Booking:</strong> {{ overnightstay.booking }}</p>           
+                </div>
+                </div>
+            </a>
+        {% empty %}
+            <p>No overnight stays found.</p>
+        {% endfor %}
+    </div>    
 </main>
 {% endblock %}

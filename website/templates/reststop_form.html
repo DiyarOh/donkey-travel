@@ -1,0 +1,27 @@
+<!-- reststop_form.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create RestStop{% endblock %}
+
+{% block header %}
+<div class="header">
+    <div class="header-text-container">
+        <h1 class="header-text">Create RestStop</h1>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+    <form method="post" action="{% url 'reststop_create' %}">
+        <div class="table-container">
+            {% csrf_token %}
+            <table class="Bookings-form-table">
+                {{ form.as_table }}
+            </table>
+        </div>
+        <div class="button-container">
+            <button class="update-button">Create RestStop</button>
+        </div>
+    </form>
+{% endblock %}

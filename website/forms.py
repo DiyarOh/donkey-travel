@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.gis.geos import Point
 
 
-from .models import Customer, Booking, Inns, Restaurant
+from .models import Customer, Booking, Inns, Restaurant, OvernightStay, RestStop, Status
 from navigation.models import Route
 from .validators import validate_phonenumber
 
@@ -225,3 +225,84 @@ class RestaurantUpdateForm(forms.ModelForm):
     class Meta:
         model = Restaurant
         exclude = ['last_edited']
+
+    
+class OvernightStayForm(forms.ModelForm):
+    booking = forms.ModelChoiceField(
+        queryset=Booking.objects.none(),
+        label='Booking',
+    )
+
+    class Meta:
+        model = OvernightStay
+        fields = ['booking', 'inn']
+
+    def __init__(self, user, *args, **kwargs):
+        super(OvernightStayForm, self).__init__(*args, **kwargs)
+        self.fields['booking'].queryset = Booking.objects.filter(customer=user.customer)
+        self.instance.status = Status.objects.get(status_code=0) 
+ 
+
+class RestStopForm(forms.ModelForm):
+    booking = forms.ModelChoiceField(
+        queryset=Booking.objects.none(), 
+        label='Booking',
+    )
+
+    class Meta:
+        model = RestStop
+        fields = ['booking', 'restaurant']
+
+    def __init__(self, user, *args, **kwargs):
+        super(RestStopForm, self).__init__(*args, **kwargs)
+        self.fields['booking'].queryset = Booking.objects.filter(customer=user.customer)
+        self.instance.status = Status.objects.get(status_code=0) 
+    
+
+class OvernightStayUpdateForm(forms.ModelForm):
+    booking = forms.ModelChoiceField(
+        queryset=Booking.objects.none(),
+        label='Booking',
+    )
+
+    class Meta:
+        model = OvernightStay
+        fields = ['booking', 'inn', 'status']
+
+    def __init__(self, user, instance, *args, **kwargs):
+        super(OvernightStayUpdateForm, self).__init__(*args, **kwargs)
+        self.user = user
+        self.instance = instance  # Add the instance attribute
+
+        if self.user.is_staff:
+            self.fields['booking'].queryset = Booking.objects.filter(pk=instance.booking.pk)
+            self.initial['status'] = instance.status
+        else:
+            self.fields['booking'].queryset = Booking.objects.filter(customer=self.user.customer)
+            self.fields.pop('status')
+        self.initial['booking'] = instance.booking
+        self.initial['inn'] = instance.inn
+
+class RestStopUpdateForm(forms.ModelForm):
+    booking = forms.ModelChoiceField(
+        queryset=Booking.objects.none(),
+        label='Booking',
+    )
+
+    class Meta:
+        model = RestStop
+        fields = ['booking', 'restaurant', 'status']
+
+    def __init__(self, user, instance, *args, **kwargs):
+        super(RestStopUpdateForm, self).__init__(*args, **kwargs)
+        self.user = user
+        self.instance = instance  # Add the instance attribute
+
+        if self.user.is_staff:
+            self.fields['booking'].queryset = Booking.objects.filter(pk=instance.booking.pk)
+            self.initial['status'] = instance.status
+        else:
+            self.fields['booking'].queryset = Booking.objects.filter(customer=self.user.customer)
+            self.fields.pop('status')
+        self.initial['booking'] = instance.booking
+        self.initial['restaurant'] = instance.restaurant
