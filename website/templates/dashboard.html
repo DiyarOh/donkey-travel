@@ -16,7 +16,9 @@
 {% block content %}
 <div class="dashboard-links">
     <a href="{% url 'bookings' %}">Bookings</a>
-    <a href="/map">Map</a>
+    {%if user.is_staff %}
+        <a href="{% url 'list_accommodations' %}">Accommodations</a>
+    {% endif %}
     <a href="/routes">Routes</a>
     <a href="/account">Account</a>
 </div>

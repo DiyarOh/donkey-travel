@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block head_content %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    {{ geoform.media }}
+{% endblock %}
+
+{% block content %}
+<main class="container">
+    <div class="booking-page">
+        <h2>Update Inn</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="booking-buttons-container">
+                <button class="update-button2" type="submit">Update Inn</button>
+                <a href="{% url 'inn_delete' object.pk %}">Delete Inn</a>
+                <a href="{% url 'list_accommodations' %}">Back to List</a>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Your map initialization code here
+        });
+    </script>
+{% endblock %}
+s

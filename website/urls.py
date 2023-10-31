@@ -3,7 +3,14 @@ from django.urls import reverse_lazy
 
 from django.contrib.auth.views import PasswordChangeView
 
-from website.views import HomepageView, BookingDetailView,BookingUpdateView, BookingDeleteView, MapView, AccountView, AccountDeleteView, BookingCreateView, ChangeRouteView, DashboardView, BookingsView, Map2View, RoutesView, StaffAccommodationsView, AccommodationsView, DeleteAccommodationsView
+from website.views import (
+    HomepageView, BookingDetailView,BookingUpdateView, 
+    BookingDeleteView, MapView, AccountView, AccountDeleteView, 
+    BookingCreateView, ChangeRouteView, DashboardView, BookingsView, 
+    Map2View, RoutesView, StaffAccommodationsView, AccommodationsView, 
+    DeleteAccommodationsView, ListAccommodationsView, CreateInnView,
+    InnsUpdateView, InnDeleteView,
+    )
 
 
 urlpatterns = [
@@ -13,6 +20,10 @@ urlpatterns = [
     path('booking/<int:pk>/delete/', BookingDeleteView.as_view(), name='booking_delete'),
     path("bookingcreate/", BookingCreateView.as_view(), name='bookingcreate'),
     path("bookings/", BookingsView.as_view(), name='bookings'),
+    path('list-inns/', ListAccommodationsView.as_view(), name='list_accommodations'),
+    path('create-inn/', CreateInnView.as_view(), name='create_inn'),
+    path('update_inn/<int:pk>/', InnsUpdateView.as_view(), name='update_inn'),
+    path('inn/<int:pk>/delete/', InnDeleteView.as_view(), name='inn_delete'),
     path("map/", MapView.as_view(), name='map'),
     path('account/<int:pk>/', AccountView.as_view(), name='account'),
     path('account_delete/<int:pk>/', AccountDeleteView.as_view(), name='account_delete'),

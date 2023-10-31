@@ -1,13 +1,64 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.gis import forms as gis_forms
 from django.contrib.auth.models import User
 from django.core.validators import EmailValidator
-from .models import Customer, Booking
+from django.utils.safestring import mark_safe
+from django.contrib.gis.geos import Point
+
+
+from .models import Customer, Booking, Inns
 from navigation.models import Route
 from .validators import validate_phonenumber
 
 
 
+class CustomMapWidget(forms.Widget):
+    def __init__(self, attrs=None, initial_lat=51.6514359606463, initial_lng=5.048809728652404, existing_lat=None, existing_lng=None):
+        self.initial_lat = initial_lat
+        self.initial_lng = initial_lng
+        self.existing_lat = existing_lat
+        self.existing_lng = existing_lng
+        super().__init__(attrs)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if value is None:
+            value = ''
+
+        if not value and self.existing_lat is not None and self.existing_lng is not None:
+            value = f'POINT({self.existing_lng} {self.existing_lat})'
+
+        return mark_safe(f"""
+            <div id="map" style="width: 100%; height: 500px;"></div>
+            <input type="hidden" name="{name}" id="{attrs['id']}" value="{value}">
+            <script>
+                var map = L.map('map').setView([{self.initial_lat}, {self.initial_lng}], 17);
+
+                L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+                    maxZoom: 24,
+                }}).addTo(map);
+
+                var marker;
+                
+                if ('{self.existing_lat}' !== 'None' && '{self.existing_lng}' !== 'None') {{
+                    marker = L.marker([{self.existing_lat}, {self.existing_lng}]).addTo(map);
+                    marker.bindPopup('Current Location').openPopup();
+                }}
+
+                map.on('click', function(e) {{
+                    if (marker) {{
+                        map.removeLayer(marker);
+                    }}
+                    marker = L.marker(e.latlng).addTo(map);
+                    marker.bindPopup('New Location').openPopup();
+
+                    var wktPoint = 'POINT(' + e.latlng.lng + ' ' + e.latlng.lat + ')';
+                    
+                    document.getElementById("{attrs['id']}").value = wktPoint;
+                }});
+            </script>
+        """)
+    
 class DateOnlyPickerWidget(forms.DateInput):
     input_type = 'date'
 
@@ -84,3 +135,48 @@ class AccountUpdateForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = ['name', 'email', 'phone']
+
+
+class InnsForm(forms.ModelForm):
+    address = forms.CharField(
+        widget=forms.TextInput(attrs={'size': '30'}),
+        label='Address'
+    )
+    coordinates = gis_forms.PointField(srid=4326, widget=CustomMapWidget(attrs={'map_width': 800, 'map_height': 500}))
+
+    class Meta:
+        model = Inns
+        exclude = ['last_edited']
+
+    def clean_coordinates(self):
+        coordinates = self.cleaned_data['coordinates']
+
+        if coordinates:
+            lat = coordinates.y
+            lng = coordinates.x
+
+        return coordinates
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.coordinates = self.cleaned_data.get('coordinates')
+        
+        if commit:
+            instance.save()
+        
+        return instance
+    
+
+class InnsUpdateForm(forms.ModelForm):
+    address = forms.CharField(
+        widget=forms.TextInput(attrs={'size': '30'}),
+        label='Address'
+    )
+    coordinates = gis_forms.PointField(
+        srid=4326,
+        widget=CustomMapWidget(attrs={'map_width': 800, 'map_height': 500})
+    )
+
+    class Meta:
+        model = Inns
+        exclude = ['last_edited']

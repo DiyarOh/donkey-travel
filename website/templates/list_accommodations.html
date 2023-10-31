@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="container">
+    <h2>List of Accommodations</h2>
+    <div class="list_container">
+        <ul>
+            {% for inn in inns %}
+                <li>
+                    <a href="{% url 'update_inn' inn.pk %}">{{ inn.name }} - {{ inn.address }} (Inn)</a>
+                </li>
+            {% empty %}
+                <li>No inns found.</li>
+            {% endfor %}
+            <a class="update-button2" href="{% url 'create_inn' %}">Create Inn</a>
+        </ul>
+        <ul>
+            {% for restaurant in restaurants %}
+                <li>
+                    <a href="{% url 'update_restaurant' restaurant.pk %}">{{ restaurant.name }} - {{ restaurant.address }} (Restaurant)</a>
+                </li>
+            {% empty %}
+                <li>No restaurants found.</li>
+            {% endfor %}
+            {# Add a link to create a restaurant if needed #}
+            {% comment %} <a class="update-button2" href="{% url 'create_restaurant' %}">Create Restaurant</a> {% endcomment %}
+        </ul>
+    </div>
+</main>
+{% endblock %}
