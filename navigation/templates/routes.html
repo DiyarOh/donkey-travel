@@ -16,11 +16,14 @@
     <div id="map" class="route-map"></div>
     <div class="controls">
         <ul class="map-list">
-            <li><button id="startDrawing">New Route</button></li>
-            <li><a href="">List Routes</a></li>
-            <li><button id="placeMarker">Place Marker</button></li>
+            {%if user.is_staff %}
+                <li><button>List Routes</button></li>
+                <li><button>List Markers</button></li>
+                <li><button>List Carts</button></li>
+            {% endif %}
+            <li><button id="placeMarker">Report Obstacle</button></li>
             <li><button id="removeMarker" style="display: none;">Remove Marker</button></li>
-            <li><button>List Markers</button></li>
+            <li><button {%if not user.is_staff %}style="display:none;" disabled {% endif %} id="startDrawing">New Route</button></li>
         </ul>
     </div>
 </section>
@@ -167,6 +170,11 @@
         });
 
         function submitLineStringData(coordinates) {
+            description = prompt("Enter a description for the route:");
+            
+            if(description === "" || description === null) {
+                description = "No Description Given";
+            }
             const lineString = {
                 type: 'LineString',
                 coordinates: coordinates
@@ -179,7 +187,7 @@
                     action: 'create-route',
                     type: 'LineString',
                     coordinates: lineString,
-                    description: 'Example',
+                    description: description,
                     duration: 5
                 }),
                 contentType: 'application/json',
