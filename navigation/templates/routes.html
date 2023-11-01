@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Routes{% endblock %}
 
@@ -7,46 +8,23 @@
     <div class="header-text-container">
       <h1 class="header-text">Routes</h1>
     </div>
-      <div class="header-buttons">
-        <a href="{% url 'changeroute' %}" class="create-booking-button">Change Route</a>
-      </div>
 </div>  
 {% endblock %}
 
 {% block content %}
-    <section class="flex">
-        <div id="map" class="flex-3"></div>
-        <div class="menu flex-1">
-            <ul>
-                <li><a href="#">About us</a></li>
-            </ul>
-            <div class="menu-image">
-                <img src="{% static 'images/donkey.png' %}" alt="Image Description">
-            </div>
-        </div>
+<div class="contents flex-around">
+    <div id="map" class="route-map"></div>
+    <div class="controls">
+        <ul class="map-list">
+            <li><button id="startDrawing">New Route</button></li>
+            <li><a href="">List Routes</a></li>
+            <li><button id="placeMarker">Place Marker</button></li>
+            <li><button id="removeMarker" style="display: none;">Remove Marker</button></li>
+            <li><button>List Markers</button></li>
+        </ul>
     </div>
-    <div class="contents flex-around">
-        <div id="map" class="route-map"></div>
-        <div class="controls">
-            <ul class="map-list">
-                <li><button id="startDrawing">New Route</button></li>
-                <li><a href="">List Routes</a></li>
-                <li><button id="placeMarker">Place Marker</button></li>
-                <li><button id="removeMarker" style="display: none;">Remove Marker</button></li>
-                <li><button>List Markers</button></li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- Define a hidden popup container -->
-    <!-- <div id="popup" class="ol-popup" style="display: none;">
-        <div id="popup-content">
-            <p>Choose an option:</p>
-            <button id="startDrawing">Start Drawing</button>
-            <button id="placeMarker">Place Marker</button>
-            <button id="removeMarker" style="display: none;">Remove Marker</button>
-        </div>
-    </div> -->
+</section>
+</div>
     {% endblock %}
 
 {% block script %}

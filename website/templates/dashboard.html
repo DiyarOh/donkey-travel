@@ -19,7 +19,7 @@
     {%if user.is_staff %}
         <a href="{% url 'list_accommodations' %}">Accommodations</a>
     {% endif %}
-    <a href="/routes">Routes</a>
+    <a href="{% url 'routes' %}">Routes</a>
     <a href="/account">Account</a>
 </div>
 {% endblock %}

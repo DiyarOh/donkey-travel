@@ -46,5 +46,4 @@ urlpatterns = [
     path("changeroute/", ChangeRouteView.as_view(), name='changeroute'),
     path("dashboard/", DashboardView.as_view(), name='dashboard'),
     path("map2/", Map2View.as_view(), name='map2'),
-    path("routes/", RoutesView.as_view(), name='routes'),
 ]
