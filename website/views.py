@@ -150,42 +150,6 @@ class BookingCreateView(FormView):
         return redirect('bookings')
 
 
-class ChangeRouteView(TemplateView):
-    template_name = "changeroute.html"
-
-
-class DashboardView(TemplateView):
-    template_name = "dashboard.html"
-
-
-class Map2View(TemplateView):
-    template_name = "map2.html"
-
-
-class RoutesView(TemplateView):
-    template_name = "routes.html"
-
-
-class StaffAccommodationsView(TemplateView):
-    template_name = "staffaccommodations.html"
-
-
-class CreateBookingView(TemplateView):
-    template_name = "createbooking.html"
-
-
-class AccommodationsView(TemplateView):
-    template_name = "accommodations.html"
-    
-
-class DeleteAccommodationsView(TemplateView):
-    template_name = "deleteaccommodations.html"
-    
-
-class MapView(TemplateView):
-    template_name = "map.html"
-
-
 class AccountView(UpdateView):
     model = Customer
     form_class = AccountUpdateForm
@@ -288,7 +252,6 @@ class RestaurantDeleteView(DeleteView):
     success_url = reverse_lazy('list_accommodations')
     template_name = 'restaurant_confirm_delete.html'
 
-
     
 class OvernightDetailView(DetailView):
     model = OvernightStay
@@ -298,7 +261,6 @@ class OvernightDetailView(DetailView):
 class ReststopDetailView(DetailView):
     model = RestStop
     template_name = 'reststop_detail.html'
-
 
 
 class OvernightStayCreateView(CreateView):
@@ -344,7 +306,7 @@ class OvernightStayUpdateView(UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user  # Pass the user to the form
+        kwargs['user'] = self.request.user  
         return kwargs
 
 
@@ -358,7 +320,7 @@ class RestStopUpdateView(UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user  # Pass the user to the form
+        kwargs['user'] = self.request.user 
         return kwargs
 
 class OvernightStayDeleteView(DeleteView):
@@ -375,3 +337,23 @@ class RestStopDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('bookings')
+    
+
+class ChangeRouteView(TemplateView):
+    template_name = "changeroute.html"
+
+
+class DashboardView(TemplateView):
+    template_name = "dashboard.html"
+
+
+class Map2View(TemplateView):
+    template_name = "map2.html"
+
+
+class RoutesView(TemplateView):
+    template_name = "routes.html"
+
+
+class MapView(TemplateView):
+    template_name = "map.html"

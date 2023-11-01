@@ -8,7 +8,6 @@ from django.contrib.gis.geos import Point
 
 from .models import Route, Obstacle
 
-# Create your views here.
 from django.views.generic import View
 
 
@@ -55,18 +54,15 @@ class RouteView(View):
         data = json.loads(request.body)
         
         if data['type'] == 'LineString':
-            # Extract the necessary data from the JSON payload
             description = data.get('description')
             duration_in_days = data.get('duration')
             route_coordinates = data['coordinates']['coordinates']
 
-            # Create a LineString from the coordinates
             route = GEOSGeometry(json.dumps({
                 "type": "LineString",
                 "coordinates": route_coordinates
             }), srid=4326)
 
-            # Create a new Route record
             route_record = Route(
                 description=description,
                 route=route,
