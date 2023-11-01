@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Routes{% endblock %}
 
@@ -7,31 +8,43 @@
     <div class="header-text-container">
       <h1 class="header-text">Routes</h1>
     </div>
-      <div class="header-buttons">
-        <a href="{% url 'changeroute' %}" class="create-booking-button">Change Route</a>
-      </div>
 </div>  
 {% endblock %}
 
 {% block content %}
-    <div class="contents">
-        <div id="map" class="route-map"></div>
-        <div class="controls">
-            <ul class="map-list">
-                <li><a href="">New Route</a></li>
-                <li><a href="">List Routes</a></li>
-                <li><a href="">Save Route</a></li>
-                <li><a href="">Reset Route</a></li>
-                <li><a href="">Send Route</a></li>
-            </ul>
-        </div>
+<div class="contents flex-around">
+    <div id="map" class="route-map"></div>
+    <div class="controls">
+        <ul class="map-list">
+            <li><button id="startDrawing">New Route</button></li>
+            <li><a href="">List Routes</a></li>
+            <li><button id="placeMarker">Place Marker</button></li>
+            <li><button id="removeMarker" style="display: none;">Remove Marker</button></li>
+            <li><button>List Markers</button></li>
+        </ul>
     </div>
-{% endblock %}
+</section>
+</div>
+    {% endblock %}
 
 {% block script %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Create a map object
+<script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === name + '=') {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         const map = new ol.Map({
             target: 'map',
             layers: [
@@ -45,37 +58,125 @@
             })
         });
 
-        // Create a source for drawing features
-        const drawSource = new ol.source.Vector();
+        let draw;
+        let markerPlacement = false;
+        let selectedMarker = null;
 
-        // Create a vector layer for the drawn features
-        const drawLayer = new ol.layer.Vector({
-            source: drawSource
+        const markersSource = new ol.source.Vector();
+        const markersLayer = new ol.layer.Vector({
+            source: markersSource
         });
 
-        map.addLayer(drawLayer);
-
-        // Create a drawing interaction
-        const draw = new ol.interaction.Draw({
-            source: drawSource,
-            type: 'LineString'
+        const markerStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                src: '{% static "img/marker.PNG" %}',
+                scale: 0.05
+            })
         });
 
-        map.addInteraction(draw);
+        map.addLayer(markersLayer);
 
-        // Function to submit LineString data to Django
+        document.getElementById('startDrawing').addEventListener('click', function () {
+            if (!draw) {
+                startDrawing();
+            }
+        });
+
+        function startDrawing() {
+            const drawSource = new ol.source.Vector();
+            const drawLayer = new ol.layer.Vector({
+                source: drawSource
+            });
+
+            map.addLayer(drawLayer);
+
+            draw = new ol.interaction.Draw({
+                source: drawSource,
+                type: 'LineString'
+            });
+
+            map.addInteraction(draw);
+
+            draw.on('drawend', function (event) {
+                const feature = event.feature;
+                const coordinates = feature.getGeometry().getCoordinates();
+
+                submitLineStringData(coordinates);
+
+                map.removeInteraction(draw);
+                draw = undefined;
+            });
+        }
+
+        document.getElementById('placeMarker').addEventListener('click', function () {
+            markerPlacement = true;
+        });
+
+        function generateUniqueMarkerId() {
+            const timestamp = new Date().getTime();
+            return `marker_${timestamp}`;
+        }
+
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based, so add 1.
+            const day = now.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        map.on('click', function (e) {
+            if (markerPlacement) {
+                const markerComment = prompt("Enter a description of the obstacle:");
+                const markerFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(e.coordinate)
+                });
+                markerFeature.setStyle(markerStyle);
+                markerFeature.set('isMarker', true);
+                markerFeature.set('comment', markerComment);  // Add the comment to the marker
+                markersSource.addFeature(markerFeature);
+                markerPlacement = false;
+
+                const latitude = e.coordinate[1];
+                const longitude = e.coordinate[0];
+                const markerId = generateUniqueMarkerId();
+                const datePlaced = getCurrentDate();
+                markerFeature.set('id', markerId);
+
+                // Include the comment when submitting marker data
+                submitObstacleData(latitude, longitude, datePlaced,markerComment, markerId, );
+            } else {
+                const features = map.getFeaturesAtPixel(e.pixel);
+                if (features) {
+                    features.forEach(function (feature) {
+                        if (feature.get('isMarker')) {
+                            selectedMarker = feature;
+                            document.getElementById('removeMarker').style.display = 'block';
+                        }
+                    });
+                }
+            }
+        });
+
+        document.getElementById('removeMarker').addEventListener('click', function () {
+            if (selectedMarker) {
+                markersSource.removeFeature(selectedMarker);
+                selectedMarker = null;
+                document.getElementById('removeMarker').style.display = 'none';
+            }
+        });
+
         function submitLineStringData(coordinates) {
             const lineString = {
                 type: 'LineString',
                 coordinates: coordinates
             };
 
-            // Send the LineString data to Django as a POST request with CSRF token
             $.ajax({
                 url: '/follow-me/routes/',
                 method: 'POST',
                 data: JSON.stringify({
-                    action: 'create',  // Specify the action here
+                    action: 'create-route',
                     type: 'LineString',
                     coordinates: lineString,
                     description: 'Example',
@@ -94,29 +195,30 @@
             });
         }
 
-        // Function to retrieve the CSRF token from cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+        function submitObstacleData(latitude, longitude, datePlaced, comment) {
+            const obstacleData = {
+                action: 'create-obstacle',
+                latitude: latitude,
+                longitude: longitude,
+                date_placed: datePlaced,
+                comment: comment  // Include the comment in the marker data
+            };
+
+            $.ajax({
+                url: '/follow-me/routes/',
+                method: 'POST',
+                data: JSON.stringify(obstacleData),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function(data) {
+                    console.log('Obstacle data sent to Django successfully.');
+                },
+                error: function(error) {
+                    console.error('Error sending obstacle data to Django.');
                 }
-            }
-            return cookieValue;
+            });
         }
-
-        // Event handler for when a feature is drawn
-        draw.on('drawend', function (event) {
-            const feature = event.feature;
-            const coordinates = feature.getGeometry().getCoordinates();
-
-            // Call the function to submit LineString data to Django
-            submitLineStringData(coordinates);
-        });
     </script>
 {% endblock %}

@@ -3,9 +3,10 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import LineString
+from django.contrib.gis.geos import Point
 
 
-from .models import Route
+from .models import Route, Obstacle
 
 # Create your views here.
 from django.views.generic import View
@@ -36,11 +37,12 @@ class RouteView(View):
 
             print(data)
 
-        if action == 'create':
-            self.create(request)
+        if action == 'create-route':
+            self.create_route(request)
         
-        elif action == 'read':
-            pass
+        elif action == 'create-obstacle':
+            print('Imm here')
+            self.create_obstacle(request)
 
         elif action == 'update':
             pass
@@ -49,7 +51,7 @@ class RouteView(View):
             pass
         return JsonResponse({'message': 'Request handled successfully.'})
     
-    def create(self, request):
+    def create_route(self, request):
         data = json.loads(request.body)
         
         if data['type'] == 'LineString':
@@ -75,3 +77,31 @@ class RouteView(View):
             return JsonResponse({'message': 'Route created successfully'})
         else:
             return JsonResponse({'message': 'Invalid request type'}, status=400)
+
+    def create_obstacle(self, request):
+        data = json.loads(request.body)
+        print("Im not useless yet")
+        # Ensure the request data contains the necessary fields
+        if 'latitude' in data and 'longitude' in data and 'date_placed' in data:
+            latitude = data['latitude']
+            longitude = data['longitude']
+            date_placed = data['date_placed']
+            if 'comment'in data:
+                comment = data['comment']
+
+            # Create a Point from the latitude and longitude
+            point = Point(longitude, latitude, srid=4326)
+
+            # Create a new Obstacle record
+
+            obstacle = Obstacle(
+                marker=point,
+                date_placed=date_placed,
+            )
+            if comment:
+                    obstacle.description=comment
+            print("EUREKA")
+            obstacle.save()
+            return JsonResponse({'message': 'Obstacle created successfully'})
+        else:
+            return JsonResponse({'message': 'Invalid request data'}, status=400)
