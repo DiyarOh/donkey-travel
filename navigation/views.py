@@ -86,15 +86,20 @@ class RouteView(View):
             latitude = data['latitude']
             longitude = data['longitude']
             date_placed = data['date_placed']
+            if 'comment'in data:
+                comment = data['comment']
 
             # Create a Point from the latitude and longitude
             point = Point(longitude, latitude, srid=4326)
 
             # Create a new Obstacle record
+
             obstacle = Obstacle(
                 marker=point,
-                date_placed=date_placed
+                date_placed=date_placed,
             )
+            if comment:
+                    obstacle.description=comment
             print("EUREKA")
             obstacle.save()
             return JsonResponse({'message': 'Obstacle created successfully'})

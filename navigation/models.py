@@ -21,6 +21,7 @@ class Tracker(models.Model):
 class Obstacle(models.Model):
     marker = models.PointField(srid=4326)  # Point field for the marker with the SRID 4326
     date_placed = models.DateField()  # Date when the obstacle is placed
+    description = models.CharField(default="no description") #adds marker comment to database
 
     def __str__(self):
         return f"Obstacle placed on {self.date_placed}"

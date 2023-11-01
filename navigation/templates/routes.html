@@ -18,10 +18,6 @@
         <div id="map" class="flex-3"></div>
         <div class="menu flex-1">
             <ul>
-                {% comment %} <li><a href="{% url 'index' %}">HomePage</a></li> {% endcomment %}
-                {% comment %} <li><a href="{% url 'bookings' %}">Bookings</a></li> {% endcomment %}
-                {% comment %} <li><a href="{% url 'login' %}">Login</a></li> {% endcomment %}
-                {% comment %} <li><a href="{% url 'map' %}">Map</a></li> {% endcomment %}
                 <li><a href="#">About us</a></li>
             </ul>
             <div class="menu-image">
@@ -35,9 +31,9 @@
             <ul class="map-list">
                 <li><button id="startDrawing">New Route</button></li>
                 <li><a href="">List Routes</a></li>
-                <li><button id="placeMarker">Place Obstacle</button></li>
-                <li><button id="removeMarker" style="display: none;">Resolve Obstacle</button></li>
-                <li><button>List Obstacles</button></li>
+                <li><button id="placeMarker">Place Marker</button></li>
+                <li><button id="removeMarker" style="display: none;">Remove Marker</button></li>
+                <li><button>List Markers</button></li>
             </ul>
         </div>
     </section>
@@ -102,8 +98,6 @@
 
         map.addLayer(markersLayer);
 
-
-
         document.getElementById('startDrawing').addEventListener('click', function () {
             if (!draw) {
                 startDrawing();
@@ -143,37 +137,36 @@
         function generateUniqueMarkerId() {
             const timestamp = new Date().getTime();
             return `marker_${timestamp}`;
-        
         }
+
         function getCurrentDate() {
             const now = new Date();
             const year = now.getFullYear();
             const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based, so add 1.
             const day = now.getDate().toString().padStart(2, '0');
             return `${year}-${month}-${day}`;
-        }   
+        }
+
         map.on('click', function (e) {
             if (markerPlacement) {
+                const markerComment = prompt("Enter a description of the obstacle:");
                 const markerFeature = new ol.Feature({
                     geometry: new ol.geom.Point(e.coordinate)
                 });
                 markerFeature.setStyle(markerStyle);
                 markerFeature.set('isMarker', true);
+                markerFeature.set('comment', markerComment);  // Add the comment to the marker
                 markersSource.addFeature(markerFeature);
                 markerPlacement = false;
 
-                // Extract latitude and longitude from e.coordinate
                 const latitude = e.coordinate[1];
                 const longitude = e.coordinate[0];
-
-                // Generate a unique ID for the marker (you may use a library or server-generated ID)
-                const markerId = generateUniqueMarkerId();  // Implement this function to generate a unique ID.
-
-                // You also need a valid date for datePlaced.
-                const datePlaced = getCurrentDate(); // Implement this function to get the current date.
-
+                const markerId = generateUniqueMarkerId();
+                const datePlaced = getCurrentDate();
                 markerFeature.set('id', markerId);
-                submitObstacleData(latitude, longitude, datePlaced, markerId);
+
+                // Include the comment when submitting marker data
+                submitObstacleData(latitude, longitude, datePlaced,markerComment, markerId, );
             } else {
                 const features = map.getFeaturesAtPixel(e.pixel);
                 if (features) {
@@ -182,21 +175,18 @@
                             selectedMarker = feature;
                             document.getElementById('removeMarker').style.display = 'block';
                         }
-                    });     
+                    });
                 }
             }
         });
 
-
         document.getElementById('removeMarker').addEventListener('click', function () {
-    if (selectedMarker) {
-        // Remove the selected marker from the map
-        markersSource.removeFeature(selectedMarker);
-        selectedMarker = null;
-        document.getElementById('removeMarker').style.display = 'none';
-    }
-});
-
+            if (selectedMarker) {
+                markersSource.removeFeature(selectedMarker);
+                selectedMarker = null;
+                document.getElementById('removeMarker').style.display = 'none';
+            }
+        });
 
         function submitLineStringData(coordinates) {
             const lineString = {
@@ -204,12 +194,11 @@
                 coordinates: coordinates
             };
 
-
             $.ajax({
                 url: '/follow-me/routes/',
                 method: 'POST',
                 data: JSON.stringify({
-                    action: 'create-route',  // Specify the action here
+                    action: 'create-route',
                     type: 'LineString',
                     coordinates: lineString,
                     description: 'Example',
@@ -228,29 +217,30 @@
             });
         }
 
-        function submitObstacleData(latitude, longitude, datePlaced) {
-    const obstacleData = {
-        action: 'create-obstacle',
-        latitude: latitude,
-        longitude: longitude,
-        date_placed: datePlaced
-    };
+        function submitObstacleData(latitude, longitude, datePlaced, comment) {
+            const obstacleData = {
+                action: 'create-obstacle',
+                latitude: latitude,
+                longitude: longitude,
+                date_placed: datePlaced,
+                comment: comment  // Include the comment in the marker data
+            };
 
-    $.ajax({
-        url: '/follow-me/routes/',
-        method: 'POST',
-        data: JSON.stringify(obstacleData),
-        contentType: 'application/json',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        success: function(data) {
-            console.log('Obstacle data sent to Django successfully.');
-        },
-        error: function(error) {
-            console.error('Error sending obstacle data to Django.');
+            $.ajax({
+                url: '/follow-me/routes/',
+                method: 'POST',
+                data: JSON.stringify(obstacleData),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function(data) {
+                    console.log('Obstacle data sent to Django successfully.');
+                },
+                error: function(error) {
+                    console.error('Error sending obstacle data to Django.');
+                }
+            });
         }
-    });
-}
     </script>
 {% endblock %}
