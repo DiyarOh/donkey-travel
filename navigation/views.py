@@ -27,6 +27,17 @@ class GpsView(View):
 
 class RouteView(View):
     def get(self, request, *args, **kwargs):
+        """
+        Retrieves a list of bookings and renders the appropriate template based on the user's role.
+
+        Parameters:
+            request (HttpRequest): The HTTP request object.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            HttpResponse: The rendered HTTP response.
+        """
         if self.request.user.is_staff:
             template_name = "routes.html"
         else:
@@ -38,6 +49,15 @@ class RouteView(View):
         return render(request, template_name, {"markers": markers, "bookings": bookings})
 
     def post(self, request):
+        """
+        Handles the HTTP POST request.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            JsonResponse: The JSON response containing the message 'Request handled successfully.'
+        """
         if request.method == 'POST':
             data = json.loads(request.body)
             action = data.get('action')
@@ -59,6 +79,15 @@ class RouteView(View):
         return JsonResponse({'message': 'Request handled successfully.'})
     
     def receive_bookings(self, request):
+        """
+        Receive bookings based on the given request.
+
+        Parameters:
+            request (Request): The request object containing user information.
+
+        Returns:
+            str: The serialized data of the bookings.
+        """
         serializer = BookingSerializer()
 
         if request.user.is_staff:
@@ -74,6 +103,15 @@ class RouteView(View):
         return data   
 
     def create_route(self, request):
+        """
+        Creates a route based on the given request data.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing the route data.
+
+        Returns:
+            JsonResponse: A JSON response indicating the success or failure of the route creation.
+        """
         data = json.loads(request.body)
         
         if data['type'] == 'LineString':
@@ -98,6 +136,17 @@ class RouteView(View):
             return JsonResponse({'message': 'Invalid request type'}, status=400)
 
     def create_obstacle(self, request):
+        """
+        Create an obstacle based on the provided request data.
+
+        Parameters:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            JsonResponse: A JSON response indicating the result of the operation.
+                - If the request data is valid, returns a JSON response with the message 'Obstacle created successfully'.
+                - If the request data is invalid, returns a JSON response with the message 'Invalid request data' and a status code of 400.
+        """
         data = json.loads(request.body)
         # Ensure the request data contains the necessary fields
         if 'latitude' in data and 'longitude' in data and 'date_placed' in data:
@@ -124,6 +173,15 @@ class RouteView(View):
 
 class ListObstaclesView(View):
     def get(self, request):
+        """
+        Retrieves all obstacles from the database and returns them as a JSON response.
+
+        Parameters:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            JsonResponse: A JSON response containing the obstacle data.
+        """
         obstacles = Obstacle.objects.all()
         obstacle_data = []
 
@@ -139,6 +197,18 @@ class ListObstaclesView(View):
         return JsonResponse({'obstacles': obstacle_data})
 
 def remove_obstacle(request):
+    """
+    Removes an obstacle based on the given request.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        JsonResponse: The JSON response indicating the result of the operation.
+            - If the obstacle is successfully deleted, returns a JSON response with the message 'Marker deleted successfully'.
+            - If the obstacle is not found, returns a JSON response with the message 'Marker not found' and a status code of 400.
+            - If the request is invalid, returns a JSON response with the message 'Invalid request' and a status code of 400.
+    """
     if request.method == 'POST':
         data = json.loads(request.body)
         marker_id = data.get('id')
@@ -154,6 +224,17 @@ def remove_obstacle(request):
 
 class ListRoutesView(View):
     def get(self, request, *args, **kwargs):
+        """
+        Retrieves routes from the database and prepares route data in GeoJSON format.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            JsonResponse: The route data in GeoJSON format.
+        """
         # Retrieve all routes from the database
         if self.request.user.is_staff:
             routes = Route.objects.all()
@@ -187,6 +268,15 @@ class ListRoutesView(View):
 
 
 def list_carts(request):
+    """
+    Retrieves a list of carts based on the given request.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response containing the serialized data of the trackers.
+    """
     if request.user.is_staff:
         trackers = Tracker.objects.all()
     else:
@@ -200,6 +290,19 @@ def list_carts(request):
 
 
 def remove_route(request):
+    """
+    Removes a route based on the provided route ID.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response indicating the result of the route removal.
+            - If the route is removed successfully, returns a JSON response with the message 'Route removed successfully'.
+            - If the route cannot be deleted due to related objects, returns a JSON response with the error message 'Cannot delete route due to related objects.' and status code 400.
+            - If an exception occurs during the removal process, returns a JSON response with the error message 'Failed to remove route: {error_message}' and status code 400.
+            - If an invalid request method is used, returns a JSON response with the error message 'Invalid request method' and status code 400.
+    """
     if request.method == 'POST':
         data = json.loads(request.body)
         route_id = data.get('id')
@@ -217,6 +320,15 @@ def remove_route(request):
 
 
 def move_tracker(request):
+    """
+    Moves the tracker to the specified latitude and longitude.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        JsonResponse: The JSON response indicating the success or failure of the tracker move.
+    """
     data = json.loads(request.body)
     # Ensure the request data contains the necessary fields
     if 'latitude' in data and 'longitude' in data:

@@ -5,9 +5,9 @@ from django.contrib.auth.views import PasswordChangeView
 
 from website.views import (
     HomepageView, BookingDetailView,BookingUpdateView, 
-    BookingDeleteView, MapView, AccountView, AccountDeleteView, 
+    BookingDeleteView, AccountView, AccountDeleteView, 
     BookingCreateView, ChangeRouteView, DashboardView, BookingsView, 
-    Map2View, RoutesView, ListAccommodationsView, CreateInnView,
+    ListAccommodationsView, CreateInnView,
     InnsUpdateView, InnDeleteView, CreateRestaurantView,
     RestaurantDeleteView, RestaurantUpdateView,RestStopCreateView, 
     OvernightStayCreateView, ReststopDetailView, OvernightDetailView,
@@ -43,6 +43,4 @@ urlpatterns = [
     path('change-password/', PasswordChangeView.as_view(template_name='change_password.html', success_url=reverse_lazy('index')), name='password_change'),
     path("changeroute/", ChangeRouteView.as_view(), name='changeroute'),
     path("dashboard/", DashboardView.as_view(), name='dashboard'),
-    path("map/", MapView.as_view(), name='map'),
-    path("map2/", Map2View.as_view(), name='map2'),
 ]

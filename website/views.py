@@ -345,15 +345,3 @@ class ChangeRouteView(TemplateView):
 
 class DashboardView(TemplateView):
     template_name = "dashboard.html"
-
-
-class Map2View(TemplateView):
-    template_name = "map2.html"
-
-
-class RoutesView(TemplateView):
-    template_name = "routes.html"
-
-
-class MapView(TemplateView):
-    template_name = "map.html"
