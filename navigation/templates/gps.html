@@ -17,6 +17,8 @@
     <div id="route-popup" class="ol-popup">
         <div id="route-popup-content"></div>
     </div>
+    <div id="markerLabelOverlay"></div>
+
     <div class="controls">
         <ul class="map-list">
             {% for booking in bookings %}
@@ -30,6 +32,8 @@
             <p>No bookings found.</p>
         {% endfor %}
             <li><button id="placeMarker">Report Obstacle</button></li>
+            <li><button id="listObstaclesButton">List Obtacles</button></li>
+
             <li><button id="moveTracker" hidden onclick="trackerPlacement = true;">Move Cart</button></li>
         </ul>
     </div>
@@ -88,6 +92,12 @@
     markerPlacement = true;
 });
 
+const markerLabelOverlay = new ol.Overlay({
+    element: document.getElementById('markerLabelOverlay'), // Assuming you have an HTML element for the label
+    offset: [0, -15], // Adjust the offset to position the label above the marker
+    positioning: 'bottom-center', // Position the label above the marker
+});
+map.addOverlay(markerLabelOverlay);
 map.addLayer(markersLayer);
 
 function generateUniqueMarkerId() {
@@ -123,7 +133,34 @@ map.on('click', function (e) {
 
         // Include the comment when submitting marker data
         submitObstacleData(latitude, longitude, datePlaced,markerComment, markerId, );
-    } 
+    } else {
+        const features = map.getFeaturesAtPixel(e.pixel);
+        if (features) {
+            features.forEach(function (feature) {
+                if (feature.get('isMarker')) {
+                    selectedMarker = feature;
+                    // Get the comment from the marker
+                    let comment = feature.get('comment');
+
+                    // Display the comment in an alert or a custom popup
+                    if (comment) {
+                        markerLabelOverlay.getElement().innerText =  comment;
+                        markerLabelOverlay.setPosition(feature.getGeometry().getCoordinates());
+                        markerLabelOverlay.setPositioning('bottom-center');
+                        markerLabelOverlay.setOffset([0, -15]);
+                        markerLabelOverlay.setOffset([0, -15]);
+                        markerLabelOverlay.setPositioning('bottom-center');
+                        markerLabelOverlay.setPosition(feature.getGeometry().getCoordinates());
+                        markerLabelOverlay.setPositioning('bottom-center');
+                        markerLabelOverlay.setPosition(feature.getGeometry().getCoordinates());
+                    } else {
+                        markerLabelOverlay.setPosition(undefined); // Hide the label
+                    }
+
+                }
+            });
+        }
+    }
 });
 function submitObstacleData(latitude, longitude, datePlaced, comment) {
     const obstacleData = {
@@ -311,6 +348,38 @@ function moveTracker(latitude, longitude) {
         }
     });
 }
+
+document.getElementById('listObstaclesButton').addEventListener('click', function () {
+    $.ajax({
+        url: '{% url 'list_obstacles' %}',
+        method: 'GET',
+        success: function (data) {
+            const obstacles = data.obstacles;
+            if (obstacles && Array.isArray(obstacles)) {
+                obstacles.forEach(function (obstacle) {
+                    // Create a feature for each obstacle and add it to the map.
+                    const marker = new ol.Feature({
+                        geometry: new ol.geom.Point([obstacle.longitude, obstacle.latitude])
+                    });
+                    marker.setStyle(markerStyle);
+                    markersSource.addFeature(marker);
+
+                    // Attach obstacle information to the feature for later use.
+                    marker.set('obstacleId', obstacle.id);
+                    marker.set('comment', obstacle.comment);
+                    marker.set('isMarker', true);
+
+                });
+            } else {
+                console.error('Invalid or empty obstacle data received.');
+            }
+        },
+        error: function (error) {
+            console.error('Error listing obstacles:', error);
+        }
+    });
+});
+
 </script>
 
 {% endblock %} 
