@@ -18,3 +18,16 @@ class TrackerSerializer(base.Serializer):
                 'booking': str(booking),  # Use __str__ method to get name + date
             })
         return data
+    
+
+class BookingSerializer(base.Serializer):
+    def serialize(self, queryset, **options):
+        data = []
+        for booking in queryset:
+            data.append({
+                'id': booking.id,
+                'start_date': booking.start_date,
+                'route': booking.route,
+                'booking': str(booking),  # Use __str__ method to get name + date
+            })
+        return data

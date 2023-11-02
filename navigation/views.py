@@ -8,7 +8,8 @@ from django.db.models.deletion import ProtectedError
 
 
 from .models import Route, Obstacle, Tracker
-from .serializers import TrackerSerializer
+from website.models import Booking
+from .serializers import TrackerSerializer, BookingSerializer
 
 from django.views.generic import View
 
@@ -26,10 +27,15 @@ class GpsView(View):
 
 class RouteView(View):
     def get(self, request, *args, **kwargs):
-        template_name = "routes.html"
+        if self.request.user.is_staff:
+            template_name = "routes.html"
+        else:
+            template_name = "gps.html"
+        
+        bookings = self.receive_bookings(request)
 
         markers = []
-        return render(request, template_name, {"markers": markers})
+        return render(request, template_name, {"markers": markers, "bookings": bookings})
 
     def post(self, request):
         if request.method == 'POST':
@@ -52,6 +58,21 @@ class RouteView(View):
             pass
         return JsonResponse({'message': 'Request handled successfully.'})
     
+    def receive_bookings(self, request):
+        serializer = BookingSerializer()
+
+        if request.user.is_staff:
+            bookings = Booking.objects.all()
+            data = serializer.serialize(bookings)
+
+        else:
+            # User is not staff, so retrieve their own bookings
+            customer = request.user.customer
+            bookings = Booking.objects.filter(customer=customer)
+            data = serializer.serialize(bookings)
+        
+        return data   
+
     def create_route(self, request):
         data = json.loads(request.body)
         
@@ -78,7 +99,6 @@ class RouteView(View):
 
     def create_obstacle(self, request):
         data = json.loads(request.body)
-        print("Im not useless yet")
         # Ensure the request data contains the necessary fields
         if 'latitude' in data and 'longitude' in data and 'date_placed' in data:
             latitude = data['latitude']
@@ -90,15 +110,12 @@ class RouteView(View):
             # Create a Point from the latitude and longitude
             point = Point(longitude, latitude, srid=4326)
 
-            # Create a new Obstacle record
-
             obstacle = Obstacle(
                 marker=point,
                 date_placed=date_placed,
             )
             if comment:
                     obstacle.description=comment
-            print("EUREKA")
             obstacle.save()
             return JsonResponse({'message': 'Obstacle created successfully'})
         else:
@@ -138,7 +155,13 @@ def remove_obstacle(request):
 class ListRoutesView(View):
     def get(self, request, *args, **kwargs):
         # Retrieve all routes from the database
-        routes = Route.objects.all()
+        if self.request.user.is_staff:
+            routes = Route.objects.all()
+        else:
+            booking_id = request.GET.get('id')
+            if booking_id is not None:
+                booking = Booking.objects.filter(id=booking_id).first()
+                routes = [booking.route]
 
         # Prepare route data in GeoJSON format
         routes_data = {
@@ -161,7 +184,6 @@ class ListRoutesView(View):
 
         # Return the route data as GeoJSON
         return JsonResponse(routes_data)
-    
 
 
 def list_carts(request):
