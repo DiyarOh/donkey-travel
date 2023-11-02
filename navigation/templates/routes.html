@@ -466,50 +466,59 @@
   });
 
   function fetchCarts() {
-      $.ajax({
-          url: '{% url 'list_carts' %}',  // Replace with the actual URL to fetch Tracker data
-          method: 'GET',
-          success: function (data) {
-              displayCarts(data);  // Call a function to display the carts on the map
-          },
-          error: function (error) {
-              alert('Error fetching cart data from the server.');
-          }
-      });
-  }
+    $.ajax({
+        url: '{% url 'list_carts' %}',  // Replace with the actual URL to fetch Tracker data
+        method: 'GET',
+        success: function (data) {
+            displayCarts(data);
+        },
+        error: function (error) {
+            alert('Error fetching cart data from the server.');
+        }
+    });
+}
 
-  const cartsSource = new ol.source.Vector();
-  const cartsLayer = new ol.layer.Vector({
-      source: cartsSource
-  });
-  map.addLayer(cartsLayer);
+const cartsSource = new ol.source.Vector();
+const cartsLayer = new ol.layer.Vector({
+    source: cartsSource
+});
+map.addLayer(cartsLayer);
 
-  function displayCarts(cartsData) {
-      cartsSource.clear();
+function displayCarts(cartsData) {
+    cartsSource.clear();
 
-      cartsData.forEach(function (cart) {
-          const coordinates = cart.location.coordinates;
+    // Define the projection for your data (EPSG:3857 for Web Mercator)
+    const dataProjection = new ol.proj.Projection({
+        code: 'EPSG:3857',
+    });
 
-          // Create a cart feature
-          const cartFeature = new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.fromLonLat(coordinates))
-          });
+    cartsData.forEach(function (cart) {
+        const coordinates = cart.location.coordinates;
 
-          // Style the cart feature (customize as needed)
-          cartFeature.setStyle(new ol.style.Style({
+        // Transform the coordinates to the map's projection (EPSG:3857)
+        const transformedCoordinates = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:3857');
+
+        // Create a cart feature
+        const cartFeature = new ol.Feature({
+            geometry: new ol.geom.Point(transformedCoordinates)
+        });
+
+        // Style the cart feature (customize as needed)
+        cartFeature.setStyle(new ol.style.Style({
             image: new ol.style.Circle({
-              radius: 10,  // Adjust the size as needed
-              fill: new ol.style.Fill({ color: 'blue' }),
-              stroke: new ol.style.Stroke({ color: 'white', width: 2 })
+                radius: 10,  // Adjust the size as needed
+                fill: new ol.style.Fill({ color: 'blue' }),
+                stroke: new ol.style.Stroke({ color: 'white', width: 2 })
             })
-          }));
-          const bookingInfo = cart.booking;
-          cartFeature.set('bookingInfo', bookingInfo);
-          cartFeature.set('isTracker', true);
+        }));
 
-          cartsSource.addFeature(cartFeature);
-      });
-  }
+        const bookingInfo = cart.booking;
+        cartFeature.set('bookingInfo', bookingInfo);
+        cartFeature.set('isTracker', true);
+
+        cartsSource.addFeature(cartFeature);
+    });
+}
   map.on('click', function (event) {
       const feature = map.forEachFeatureAtPixel(event.pixel, function (feature) {
           return feature;

@@ -187,7 +187,13 @@ class ListRoutesView(View):
 
 
 def list_carts(request):
-    trackers = Tracker.objects.all()
+    if request.user.is_staff:
+        trackers = Tracker.objects.all()
+    else:
+        booking = get_object_or_404(Booking, id=request.GET.get('id'))
+        tracker = get_object_or_404(Tracker, booking=booking)
+        trackers = [tracker]
+ 
     serializer = TrackerSerializer()
     data = serializer.serialize(trackers)
     return JsonResponse(data, safe=False)
@@ -208,3 +214,30 @@ def remove_route(request):
             return JsonResponse({'error': 'Failed to remove route: ' + str(e)})
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+def move_tracker(request):
+    data = json.loads(request.body)
+    # Ensure the request data contains the necessary fields
+    if 'latitude' in data and 'longitude' in data:
+        latitude = data['latitude']
+        longitude = data['longitude']
+        print('first if')
+
+        # Create a Point from the latitude and longitude
+        point = Point(longitude, latitude, srid=4326)
+
+        if 'bookingId' in data: 
+            print('2nd if')
+
+            booking = get_object_or_404(Booking, id=data['bookingId'])
+            tracker = get_object_or_404(Tracker, booking=booking)
+
+            tracker.location = point
+
+            if tracker.save():
+                return JsonResponse({'message': 'Tracker created successfully'})
+            else:
+                return JsonResponse({'message': 'Tracker could not be moved'})
+    else:
+        return JsonResponse({'message': 'Invalid request data'}, status=400)

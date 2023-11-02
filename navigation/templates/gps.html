@@ -30,6 +30,7 @@
             <p>No bookings found.</p>
         {% endfor %}
             <li><button id="placeMarker">Report Obstacle</button></li>
+            <li><button id="moveTracker" hidden onclick="trackerPlacement = true;">Move Cart</button></li>
         </ul>
     </div>
 </div>
@@ -67,6 +68,8 @@
 
   let draw;
   let markerPlacement = false;
+  let trackerPlacement = false;
+  let currentBooking = null;
   let selectedMarker = null;
 
   const markersSource = new ol.source.Vector();
@@ -149,12 +152,13 @@ function submitObstacleData(latitude, longitude, datePlaced, comment) {
 }
 
 function fetchRoutes(bookingId) {
+    currentBooking = bookingId;
     if (bookingId) {
         $.ajax({
             url: '{% url 'list_routes' %}?id=' + bookingId,  // Send id as a GET parameter
             method: 'GET',
             success: function (data) {
-                displayRoutes(data);
+                displayRoutes(data, bookingId);
             },
             error: function (error) {
                 console.error('Error fetching route data from the server.');
@@ -171,10 +175,12 @@ const routesLayer = new ol.layer.Vector({
 });
 map.addLayer(routesLayer);
 
-function displayRoutes(routesData) {
+function displayRoutes(routesData, bookingId) {
     const routes = routesData.features;
+    document.getElementById('moveTracker').style.display = 'block';
 
     routesSource.clear();
+    fetchCarts(bookingId);
 
     routes.forEach(function (route) {
         const routeGeometryString = route.geometry;
@@ -203,6 +209,105 @@ function displayRoutes(routesData) {
             routesSource.addFeature(routeFeature);
         } catch (error) {
             console.error('Error parsing route geometry:', error);
+        }
+    });
+}
+
+function fetchCarts(bookingId) {
+    $.ajax({
+        url: '{% url 'list_carts' %}?id=' + bookingId,  // Replace with the actual URL to fetch Tracker data
+        method: 'GET',
+        success: function (data) {
+            displayCarts(data);  // Call a function to display the carts on the map
+        },
+        error: function (error) {
+            alert('Error fetching cart data from the server.');
+        }
+    });
+}
+
+const cartsSource = new ol.source.Vector();
+const cartsLayer = new ol.layer.Vector({
+    source: cartsSource
+});
+map.addLayer(cartsLayer);
+
+function displayCarts(cartsData) {
+    cartsSource.clear();
+
+    cartsData.forEach(function (cart) {
+        const coordinates = cart.location.coordinates;
+
+        // Transform the coordinates to the map's projection (EPSG:3857)
+        const transformedCoordinates = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:3857');
+
+        // Create a cart feature
+        const cartFeature = new ol.Feature({
+            geometry: new ol.geom.Point(transformedCoordinates)
+        });
+
+        // Style the cart feature (customize as needed)
+        cartFeature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 10,  // Adjust the size as needed
+                fill: new ol.style.Fill({ color: 'blue' }),
+                stroke: new ol.style.Stroke({ color: 'white', width: 2 })
+            })
+        }));
+
+        const bookingInfo = cart.booking;
+        cartFeature.set('bookingInfo', bookingInfo);
+        cartFeature.set('isTracker', true);
+
+        cartsSource.addFeature(cartFeature);
+    });
+}
+
+map.on('click', function (e) {
+    if (trackerPlacement) {
+        const markerFeature = new ol.Feature({
+            geometry: new ol.geom.Point(e.coordinate)
+        });
+        markerFeature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 10,  // Adjust the size as needed
+              fill: new ol.style.Fill({ color: 'blue' }),
+              stroke: new ol.style.Stroke({ color: 'white', width: 2 })
+            })
+          }));
+        markerFeature.set('isMarker', true);
+        markersSource.addFeature(markerFeature);
+        trackerPlacement = false;
+
+        const latitude = e.coordinate[1];
+        const longitude = e.coordinate[0];
+        markerFeature.set('id', currentBooking);
+
+        // Include the comment when submitting marker data
+        moveTracker(latitude, longitude);
+    } 
+});
+function moveTracker(latitude, longitude) {
+    const trackerData = {
+        action: 'move-tracker',
+        latitude: latitude,
+        longitude: longitude,
+        bookingId: currentBooking,
+    };
+
+    $.ajax({
+        url: '{% url 'move_tracker' %}',
+        method: 'POST',
+        data: JSON.stringify(trackerData),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        success: function(data) {
+            console.log('Tracker data sent to Django successfully.');
+        },
+        error: function(error) {
+            console.error('Error sending tracker data to Django.');
         }
     });
 }
