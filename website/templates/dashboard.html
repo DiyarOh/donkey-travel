@@ -20,6 +20,7 @@
         <a href="{% url 'list_accommodations' %}">Accommodations</a>
     {% endif %}
     <a href="{% url 'routes' %}">Routes</a>
+ 
     {% if user.customer.pk %}
         <a href="{% url 'account' user.customer.pk %}">Account</a>
     {% endif %}
