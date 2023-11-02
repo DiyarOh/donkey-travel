@@ -1,232 +1,538 @@
 {% extends 'base.html' %}
-{% load static %}
-
+{% load static %} 
 {% block title %}Routes{% endblock %}
-
 {% block header %}
 <div class="header">
-    <div class="header-text-container">
-      <h1 class="header-text">Routes</h1>
-    </div>
-</div>  
+  <div class="header-text-container">
+    <h1 class="header-text">Routes</h1>
+  </div>
+</div>
 {% endblock %}
-
 {% block content %}
 <div class="contents flex-around">
-    <div id="map" class="route-map"></div>
-    <div class="controls">
-        <ul class="map-list">
-            {%if user.is_staff %}
-                <li><button>List Routes</button></li>
-                <li><button>List Markers</button></li>
-                <li><button>List Carts</button></li>
-            {% endif %}
-            <li><button id="placeMarker">Report Obstacle</button></li>
-            <li><button id="removeMarker" style="display: none;">Remove Marker</button></li>
-            <li><button {%if not user.is_staff %}style="display:none;" disabled {% endif %} id="startDrawing">New Route</button></li>
-        </ul>
-    </div>
-</section>
+  <div id="map" class="route-map"></div>
+  <div id="markerLabelOverlay"></div>
+  <div id="route-popup" class="ol-popup">
+    <div id="tracker-popup-content"></div>
+  </div>
+  <div class="controls">
+    <ul class="map-list">
+      {%if user.is_staff %}
+      <li><button id="listRoutes">List Routes</button></li>
+      <li><button id="listObstaclesButton">List Obtacles</button></li>
+      <li><button id="listCarts">List Carts</button></li>
+      {% endif %}
+      <li><button id="placeMarker" hidden>Report Obstacle</button></li>
+      <li>
+        <button id="removeMarker" style="display: none">Remove Marker</button>
+      </li>
+      <li>
+        <button id="removeRoute" style="display: none">Remove Route</button>
+      </li>
+      <li>
+        <button {% if not user.is_staff %}style="display:none;" disabled {% endif %} id="startDrawing"> New Route </button>
+      </li>
+    </ul>
+  </div>
 </div>
-    {% endblock %}
-
+{% endblock %} 
 {% block script %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === name + '=') {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === name + '=') {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+
+  const map = new ol.Map({
+      target: 'map',
+      layers: [
+          new ol.layer.Tile({
+              source: new ol.source.OSM()
+          })
+      ],
+      view: new ol.View({
+          center: ol.proj.fromLonLat([5.048809728652404, 51.6514359606463]),
+          zoom: 17
+      })
+  });
+  // Create a new overlay for the marker label
+  const markerLabelOverlay = new ol.Overlay({
+      element: document.getElementById('markerLabelOverlay'), // Assuming you have an HTML element for the label
+      offset: [0, -15], // Adjust the offset to position the label above the marker
+      positioning: 'bottom-center', // Position the label above the marker
+  });
+  map.addOverlay(markerLabelOverlay);
+
+  const routePopupOverlay = new ol.Overlay({
+      element: document.getElementById('tracker-popup-content'), // This assumes you have an HTML element with the id 'route-popup' for displaying the description
+      positioning: 'bottom-center',
+      autoPan: true,
+      autoPanAnimation: {
+          duration: 250
+      }
+  });
+  map.addOverlay(routePopupOverlay);
+
+  let draw;
+  let markerPlacement = false;
+  let selectedMarker = null;
+
+  const markersSource = new ol.source.Vector();
+  const markersLayer = new ol.layer.Vector({
+      source: markersSource
+  });
+
+  const markerStyle = new ol.style.Style({
+      image: new ol.style.Icon({
+          src: '{% static "img/marker.PNG" %}',
+          scale: 0.05
+      })
+  });
+
+
+  map.addLayer(markersLayer);
+
+  document.getElementById('startDrawing').addEventListener('click', function () {
+      if (!draw) {
+          startDrawing();
+      }
+  });
+
+  function startDrawing() {
+      const drawSource = new ol.source.Vector();
+      const drawLayer = new ol.layer.Vector({
+          source: drawSource
+      });
+
+      map.addLayer(drawLayer);
+
+      draw = new ol.interaction.Draw({
+          source: drawSource,
+          type: 'LineString'
+      });
+
+      map.addInteraction(draw);
+
+      draw.on('drawend', function (event) {
+          const feature = event.feature;
+          const coordinates = feature.getGeometry().getCoordinates();
+
+          submitLineStringData(coordinates);
+
+          map.removeInteraction(draw);
+          draw = undefined;
+      });
+  }
+
+  document.getElementById('placeMarker').addEventListener('click', function () {
+      markerPlacement = true;
+  });
+
+  function generateUniqueMarkerId() {
+      const timestamp = new Date().getTime();
+      return `marker_${timestamp}`;
+  }
+
+  function getCurrentDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based, so add 1.
+      const day = now.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+  }
+
+  map.on('click', function (e) {
+      if (markerPlacement) {
+          const markerComment = prompt("Enter a description of the obstacle:");
+          const markerFeature = new ol.Feature({
+              geometry: new ol.geom.Point(e.coordinate)
+          });
+          markerFeature.setStyle(markerStyle);
+          markerFeature.set('isMarker', true);
+          markerFeature.set('comment', markerComment);  // Add the comment to the marker
+          markersSource.addFeature(markerFeature);
+          markerPlacement = false;
+
+          const latitude = e.coordinate[1];
+          const longitude = e.coordinate[0];
+          const markerId = generateUniqueMarkerId();
+          const datePlaced = getCurrentDate();
+          markerFeature.set('id', markerId);
+
+          // Include the comment when submitting marker data
+          submitObstacleData(latitude, longitude, datePlaced,markerComment, markerId, );
+      } else {
+          const features = map.getFeaturesAtPixel(e.pixel);
+          if (features) {
+              features.forEach(function (feature) {
+                  if (feature.get('isMarker')) {
+                      selectedMarker = feature;
+                      document.getElementById('removeMarker').style.display = 'block';
+                      // Get the comment from the marker
+                      let comment = feature.get('comment');
+
+                      // Display the comment in an alert or a custom popup
+                      if (comment) {
+                          markerLabelOverlay.getElement().innerText =  comment;
+                          markerLabelOverlay.setPosition(feature.getGeometry().getCoordinates());
+                          markerLabelOverlay.setPositioning('bottom-center');
+                          markerLabelOverlay.setOffset([0, -15]);
+                          markerLabelOverlay.setOffset([0, -15]);
+                          markerLabelOverlay.setPositioning('bottom-center');
+                          markerLabelOverlay.setPosition(feature.getGeometry().getCoordinates());
+                          markerLabelOverlay.setPositioning('bottom-center');
+                          markerLabelOverlay.setPosition(feature.getGeometry().getCoordinates());
+                      } else {
+                          markerLabelOverlay.setPosition(undefined); // Hide the label
+                      }
+
+                  }
+              });
+          }
+      }
+  });
+
+  document.getElementById('removeMarker').addEventListener('click', function () {
+      if (selectedMarker) {
+          // Get the marker's ID from the data attribute
+          let markerId = selectedMarker.get('obstacleId');
+
+          // Remove the selected marker from the map
+          markersSource.removeFeature(selectedMarker);
+          selectedMarker = null;
+          document.getElementById('removeMarker').style.display = 'none';
+          console.log(markerId);
+
+          // Trigger an AJAX request to delete the marker from the database
+          $.ajax({
+              url: '{% url 'remove_obstacle' %}', // Replace with the URL to delete the marker
+              method: 'POST',
+              data: JSON.stringify({ id: markerId }), // Send the marker ID for deletion
+              contentType: 'application/json',
+              headers: {
+                  'X-CSRFToken': getCookie('csrftoken')
+              },
+              success: function(data) {
+                  console.log('Marker removed from the database successfully.');
+              },
+              error: function(error) {
+                  console.error('Error removing marker from the database.');
+              }
+          });
+      }
+  });
+
+  function submitLineStringData(coordinates) {
+      description = prompt("Enter a description for the route:");
+
+      if(description === "" || description === null) {
+          description = "No Description Given";
+      }
+      const lineString = {
+          type: 'LineString',
+          coordinates: coordinates
+      };
+
+      $.ajax({
+          url: '/follow-me/routes/',
+          method: 'POST',
+          data: JSON.stringify({
+              action: 'create-route',
+              type: 'LineString',
+              coordinates: lineString,
+              description: description,
+              duration: 5
+          }),
+          contentType: 'application/json',
+          headers: {
+              'X-CSRFToken': getCookie('csrftoken')
+          },
+          success: function(data) {
+              console.log('LineString data sent to Django successfully.');
+          },
+          error: function(error) {
+              console.error('Error sending LineString data to Django.');
+          }
+      });
+  }
+
+  function submitObstacleData(latitude, longitude, datePlaced, comment) {
+      const obstacleData = {
+          action: 'create-obstacle',
+          latitude: latitude,
+          longitude: longitude,
+          date_placed: datePlaced,
+          comment: comment  // Include the comment in the marker data
+      };
+
+      $.ajax({
+          url: '/follow-me/routes/',
+          method: 'POST',
+          data: JSON.stringify(obstacleData),
+          contentType: 'application/json',
+          headers: {
+              'X-CSRFToken': getCookie('csrftoken')
+          },
+          success: function(data) {
+              console.log('Obstacle data sent to Django successfully.');
+          },
+          error: function(error) {
+              console.error('Error sending obstacle data to Django.');
+          }
+      });
+  }
+
+  document.getElementById('listObstaclesButton').addEventListener('click', function () {
+      $.ajax({
+          url: '{% url 'list_obstacles' %}',
+          method: 'GET',
+          success: function (data) {
+              const obstacles = data.obstacles;
+              if (obstacles && Array.isArray(obstacles)) {
+                  obstacles.forEach(function (obstacle) {
+                      // Create a feature for each obstacle and add it to the map.
+                      const marker = new ol.Feature({
+                          geometry: new ol.geom.Point([obstacle.longitude, obstacle.latitude])
+                      });
+                      marker.setStyle(markerStyle);
+                      markersSource.addFeature(marker);
+
+                      // Attach obstacle information to the feature for later use.
+                      marker.set('obstacleId', obstacle.id);
+                      marker.set('comment', obstacle.comment);
+                      marker.set('isMarker', true);
+
+                  });
+              } else {
+                  console.error('Invalid or empty obstacle data received.');
+              }
+          },
+          error: function (error) {
+              console.error('Error listing obstacles:', error);
+          }
+      });
+  });
+
+
+  function fetchRoutes() {
+      $.ajax({
+          url: '{% url 'list_routes' %}',  // Replace with the actual URL to fetch route data
+          method: 'GET',
+          success: function (data) {
+              displayRoutes(data);  // Call a function to display the routes on the map
+          },
+          error: function (error) {
+              console.error('Error fetching route data from the server.');
+          }
+      });
+  }
+  const routesSource = new ol.source.Vector();
+  const routesLayer = new ol.layer.Vector({
+      source: routesSource
+  });
+  map.addLayer(routesLayer);
+
+  function displayRoutes(routesData) {
+      const routes = routesData.features;
+
+      routesSource.clear();
+
+      routes.forEach(function (route) {
+          const routeGeometryString = route.geometry;
+          let coordinates;
+
+          try {
+              const routeGeometry = JSON.parse(routeGeometryString);
+              coordinates = routeGeometry.coordinates;
+
+              const routeFeature = new ol.Feature({
+                  geometry: new ol.geom.LineString(coordinates),
+                  properties: route.properties // Store properties within the feature
+              });
+
+              // Set the 'routeId' property with a unique identifier
+              const routeId = route.id;
+              routeFeature.set('routeId', routeId);
+
+              routeFeature.setStyle(new ol.style.Style({
+                  stroke: new ol.style.Stroke({
+                      color: 'blue',
+                      width: 2
+                  })
+              }));
+
+              routesSource.addFeature(routeFeature);
+          } catch (error) {
+              console.error('Error parsing route geometry:', error);
+          }
+      });
+  }
+
+  map.on('click', function (event) {
+    map.forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+        if (feature && feature.get('properties')) {
+            // Get the selected feature's properties
+            const properties = feature.get('properties');
+            const description = properties.description; // Ensure 'description' property exists
+
+            // Check if the description exists and is not empty
+            if (description && description.trim() !== '') {
+                selectedRoute = feature;
+                document.getElementById('removeRoute').style.display = 'block';
+
+                // Display the description in a popup
+                alert("This route is: " + description);
+
+                // Change the style of the selected feature
+                feature.setStyle(new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'green', // Change the color to green
+                        width: 4 // Make it thicker (adjust as needed)
+                    })
+                }));
+
+                // Reset the style of other features (optional)
+                routesSource.getFeatures().forEach(function (routeFeature) {
+                    if (routeFeature !== feature) {
+                        routeFeature.setStyle(new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                color: 'blue', // Default color
+                                width: 2 // Default width
+                            })
+                        }));
                     }
-                }
-            }
-            return cookieValue;
-        }
-
-        const map = new ol.Map({
-            target: 'map',
-            layers: [
-                new ol.layer.Tile({
-                    source: new ol.source.OSM()
-                })
-            ],
-            view: new ol.View({
-                center: ol.proj.fromLonLat([5.048809728652404, 51.6514359606463]),
-                zoom: 17
-            })
-        });
-
-        let draw;
-        let markerPlacement = false;
-        let selectedMarker = null;
-
-        const markersSource = new ol.source.Vector();
-        const markersLayer = new ol.layer.Vector({
-            source: markersSource
-        });
-
-        const markerStyle = new ol.style.Style({
-            image: new ol.style.Icon({
-                src: '{% static "img/marker.PNG" %}',
-                scale: 0.05
-            })
-        });
-
-        map.addLayer(markersLayer);
-
-        document.getElementById('startDrawing').addEventListener('click', function () {
-            if (!draw) {
-                startDrawing();
-            }
-        });
-
-        function startDrawing() {
-            const drawSource = new ol.source.Vector();
-            const drawLayer = new ol.layer.Vector({
-                source: drawSource
-            });
-
-            map.addLayer(drawLayer);
-
-            draw = new ol.interaction.Draw({
-                source: drawSource,
-                type: 'LineString'
-            });
-
-            map.addInteraction(draw);
-
-            draw.on('drawend', function (event) {
-                const feature = event.feature;
-                const coordinates = feature.getGeometry().getCoordinates();
-
-                submitLineStringData(coordinates);
-
-                map.removeInteraction(draw);
-                draw = undefined;
-            });
-        }
-
-        document.getElementById('placeMarker').addEventListener('click', function () {
-            markerPlacement = true;
-        });
-
-        function generateUniqueMarkerId() {
-            const timestamp = new Date().getTime();
-            return `marker_${timestamp}`;
-        }
-
-        function getCurrentDate() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based, so add 1.
-            const day = now.getDate().toString().padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        map.on('click', function (e) {
-            if (markerPlacement) {
-                const markerComment = prompt("Enter a description of the obstacle:");
-                const markerFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(e.coordinate)
                 });
-                markerFeature.setStyle(markerStyle);
-                markerFeature.set('isMarker', true);
-                markerFeature.set('comment', markerComment);  // Add the comment to the marker
-                markersSource.addFeature(markerFeature);
-                markerPlacement = false;
-
-                const latitude = e.coordinate[1];
-                const longitude = e.coordinate[0];
-                const markerId = generateUniqueMarkerId();
-                const datePlaced = getCurrentDate();
-                markerFeature.set('id', markerId);
-
-                // Include the comment when submitting marker data
-                submitObstacleData(latitude, longitude, datePlaced,markerComment, markerId, );
             } else {
-                const features = map.getFeaturesAtPixel(e.pixel);
-                if (features) {
-                    features.forEach(function (feature) {
-                        if (feature.get('isMarker')) {
-                            selectedMarker = feature;
-                            document.getElementById('removeMarker').style.display = 'block';
-                        }
-                    });
-                }
+                // Hide the popup
+                routePopupOverlay.setPosition(undefined);
             }
-        });
-
-        document.getElementById('removeMarker').addEventListener('click', function () {
-            if (selectedMarker) {
-                markersSource.removeFeature(selectedMarker);
-                selectedMarker = null;
-                document.getElementById('removeMarker').style.display = 'none';
-            }
-        });
-
-        function submitLineStringData(coordinates) {
-            description = prompt("Enter a description for the route:");
-            
-            if(description === "" || description === null) {
-                description = "No Description Given";
-            }
-            const lineString = {
-                type: 'LineString',
-                coordinates: coordinates
-            };
-
-            $.ajax({
-                url: '/follow-me/routes/',
-                method: 'POST',
-                data: JSON.stringify({
-                    action: 'create-route',
-                    type: 'LineString',
-                    coordinates: lineString,
-                    description: description,
-                    duration: 5
-                }),
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                success: function(data) {
-                    console.log('LineString data sent to Django successfully.');
-                },
-                error: function(error) {
-                    console.error('Error sending LineString data to Django.');
-                }
-            });
+        } else {
+            // Hide the popup
+            routePopupOverlay.setPosition(undefined);
         }
+    });
+});
 
-        function submitObstacleData(latitude, longitude, datePlaced, comment) {
-            const obstacleData = {
-                action: 'create-obstacle',
-                latitude: latitude,
-                longitude: longitude,
-                date_placed: datePlaced,
-                comment: comment  // Include the comment in the marker data
-            };
+  document.getElementById('removeRoute').addEventListener('click', function () {
+      if (selectedRoute) {
+          // Get the route's ID from the data attribute
+          let routeId = selectedRoute.get('routeId');
 
-            $.ajax({
-                url: '/follow-me/routes/',
-                method: 'POST',
-                data: JSON.stringify(obstacleData),
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                success: function(data) {
-                    console.log('Obstacle data sent to Django successfully.');
-                },
-                error: function(error) {
-                    console.error('Error sending obstacle data to Django.');
-                }
-            });
-        }
-    </script>
+          // Remove the selected route from the map
+          routesSource.removeFeature(selectedRoute);
+          selectedRoute = null;
+          document.getElementById('removeRoute').style.display = 'none';
+          console.log(routeId);
+
+          // Trigger an AJAX request to delete the route from the server
+          $.ajax({
+              url: '{% url 'remove_route' %}', // Replace with the URL to delete the route
+              method: 'POST',
+              data: JSON.stringify({ id: routeId }), // Send the route ID for deletion
+              contentType: 'application/json',
+              headers: {
+                  'X-CSRFToken': getCookie('csrftoken')
+              },
+              success: function (data) {
+                  console.log('Route removed from the database successfully.');
+              },
+              error: function (error) {
+                  let errorMessage;
+                  if (error.responseJSON && error.responseJSON.error) {
+                      errorMessage = error.responseJSON.error;
+                  } else {
+                      errorMessage = 'An error occurred during the request.';
+                  }
+
+                  alert(errorMessage);
+              }
+          });
+      }
+  });
+
+  document.getElementById('listRoutes').addEventListener('click', function () {
+      fetchRoutes();
+  });
+
+  function fetchCarts() {
+      $.ajax({
+          url: '{% url 'list_carts' %}',  // Replace with the actual URL to fetch Tracker data
+          method: 'GET',
+          success: function (data) {
+              displayCarts(data);  // Call a function to display the carts on the map
+          },
+          error: function (error) {
+              alert('Error fetching cart data from the server.');
+          }
+      });
+  }
+
+  const cartsSource = new ol.source.Vector();
+  const cartsLayer = new ol.layer.Vector({
+      source: cartsSource
+  });
+  map.addLayer(cartsLayer);
+
+  function displayCarts(cartsData) {
+      cartsSource.clear();
+
+      cartsData.forEach(function (cart) {
+          const coordinates = cart.location.coordinates;
+
+          // Create a cart feature
+          const cartFeature = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.fromLonLat(coordinates))
+          });
+
+          // Style the cart feature (customize as needed)
+          cartFeature.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 10,  // Adjust the size as needed
+              fill: new ol.style.Fill({ color: 'blue' }),
+              stroke: new ol.style.Stroke({ color: 'white', width: 2 })
+            })
+          }));
+          const bookingInfo = cart.booking;
+          cartFeature.set('bookingInfo', bookingInfo);
+          cartFeature.set('isTracker', true);
+
+          cartsSource.addFeature(cartFeature);
+      });
+  }
+  map.on('click', function (event) {
+      const feature = map.forEachFeatureAtPixel(event.pixel, function (feature) {
+          return feature;
+      });
+
+      if (feature && feature.get('isTracker')) {
+          // Extract the booking information from the feature's properties
+          const bookingInfo = feature.get('bookingInfo');
+
+          if (bookingInfo) {
+              // Display the booking information in a popup
+              const content = `<div id="tracker-popup-content">${bookingInfo}</div>`;
+              routePopupOverlay.getElement().innerHTML = content;
+              routePopupOverlay.setPosition(event.coordinate);
+          }
+      } else {
+          // Hide the popup
+          routePopupOverlay.setPosition(undefined);
+      }
+  });
+
+  document.getElementById('listCarts').addEventListener('click', function () {
+      fetchCarts();
+  });
+</script>
 {% endblock %}

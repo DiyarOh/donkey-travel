@@ -1,12 +1,14 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import LineString
 from django.contrib.gis.geos import Point
+from django.db.models.deletion import ProtectedError
 
 
-from .models import Route, Obstacle
+from .models import Route, Obstacle, Tracker
+from .serializers import TrackerSerializer
 
 from django.views.generic import View
 
@@ -101,3 +103,86 @@ class RouteView(View):
             return JsonResponse({'message': 'Obstacle created successfully'})
         else:
             return JsonResponse({'message': 'Invalid request data'}, status=400)
+    
+
+class ListObstaclesView(View):
+    def get(self, request):
+        obstacles = Obstacle.objects.all()
+        obstacle_data = []
+
+        for obstacle in obstacles:
+            obstacle_data.append({
+                'id': obstacle.id,
+                'latitude': obstacle.marker.y,
+                'longitude': obstacle.marker.x,
+                'date_placed': obstacle.date_placed,
+                'comment': obstacle.description,
+            })
+
+        return JsonResponse({'obstacles': obstacle_data})
+
+def remove_obstacle(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        marker_id = data.get('id')
+        try:
+            # Retrieve the marker based on its ID and delete it
+            marker = Obstacle.objects.get(id=marker_id)
+            marker.delete()
+            return JsonResponse({'message': 'Marker deleted successfully'})
+        except Obstacle.DoesNotExist:
+            return JsonResponse({'message': 'Marker not found'}, status=400)
+    return JsonResponse({'message': 'Invalid request'}, status=400)
+
+
+class ListRoutesView(View):
+    def get(self, request, *args, **kwargs):
+        # Retrieve all routes from the database
+        routes = Route.objects.all()
+
+        # Prepare route data in GeoJSON format
+        routes_data = {
+            "type": "FeatureCollection",
+            "features": []
+        }
+
+        for route in routes:
+            # Assuming route.route.geojson is a valid GeoJSON string
+            route_data = {
+                "id": route.id,
+                "type": "Feature",
+                "geometry": route.route.geojson,  # Make sure route.route.geojson is a valid GeoJSON string
+                "properties": {
+                    "description": route.description,
+                    "duration_in_days": route.duration_in_days
+                }
+            }
+            routes_data["features"].append(route_data)
+
+        # Return the route data as GeoJSON
+        return JsonResponse(routes_data)
+    
+
+
+def list_carts(request):
+    trackers = Tracker.objects.all()
+    serializer = TrackerSerializer()
+    data = serializer.serialize(trackers)
+    return JsonResponse(data, safe=False)
+
+
+def remove_route(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        route_id = data.get('id')
+
+        try:
+            route = get_object_or_404(Route, id=route_id)
+            route.delete() 
+            return JsonResponse({'message': 'Route removed successfully'})
+        except ProtectedError as e:
+            return JsonResponse({'error': 'Cannot delete route due to related objects.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': 'Failed to remove route: ' + str(e)})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

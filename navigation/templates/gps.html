@@ -1,120 +1,34 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Map{% endblock %}
+{% block title %}Routes{% endblock %}
 
 {% block header %}
 <div class="header">
     <div class="header-text-container">
-        <h1 class="header-text">Map</h1>
+      <h1 class="header-text">Routes</h1>
     </div>
-    <div class="header-buttons">
-        <a href="{% url 'changeroute' %}" class="create-booking-button">Change Route</a>
-    </div>
-</div>
+</div>  
 {% endblock %}
 
 {% block content %}
 <div class="contents flex-around">
-    <div id="map" class="map"></div>
+    <div id="map" class="route-map"></div>
+    <div id="markerLabelOverlay"></div>
+    <div id="route-popup" class="ol-popup">
+        <div id="route-popup-content"></div>
+    </div>
     <div class="controls">
         <ul class="map-list">
-            <li><a href="">Report Obstacle</a></li>
-            <li><a href="">Request Help</a></li>
-            <li><a href="">Route Changes</a></li>
-            <li><a href="">Call Checkpoint</a></li>
+            {%if user.is_staff %}
+                <li><button id="listRoutes">List Routes</button></li>
+                <li><button id="listObstaclesButton">List Obtacles</button></li>
+                <li><button>List Carts</button></li>
+            {% endif %}
+            <li><button id="placeMarker">Report Obstacle</button></li>
+            <li><button id="removeMarker" style="display: none;">Remove Marker</button></li>
+            <li><button {%if not user.is_staff %}style="display:none;" disabled {% endif %} id="startDrawing">New Route</button></li>
         </ul>
     </div>
 </div>
-{% endblock %}
-
-{% block script %}
-<script>
-    // Create a map object
-    const map = new ol.Map({
-        target: 'map',
-        layers: [
-            new ol.layer.Tile({
-                source: new ol.source.OSM()
-            })
-        ],
-        view: new ol.View({
-            center: ol.proj.fromLonLat([5.048809728652404, 51.6514359606463]),
-            zoom: 17
-        })
-    });
-
-    // Create a source for drawing features
-    const drawSource = new ol.source.Vector();
-
-    // Create a vector layer for the drawn features
-    const drawLayer = new ol.layer.Vector({
-        source: drawSource
-    });
-
-    map.addLayer(drawLayer);
-
-    // Create a drawing interaction
-    const draw = new ol.interaction.Draw({
-        source: drawSource,
-        type: 'LineString'
-    });
-
-    map.addInteraction(draw);
-
-    // Function to submit LineString data to Django
-    function submitLineStringData(coordinates) {
-        const lineString = {
-            type: 'LineString',
-            coordinates: coordinates
-        };
-
-        // Send the LineString data to Django as a POST request with CSRF token
-        $.ajax({
-            url: '/follow-me/routes/',
-            method: 'POST',
-            data: JSON.stringify({
-                action: 'create',  // Specify the action here
-                type: 'LineString',
-                coordinates: lineString,
-                description: 'Example',
-                duration: 5
-            }),
-            contentType: 'application/json',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            success: function (data) {
-                console.log('LineString data sent to Django successfully.');
-            },
-            error: function (error) {
-                console.error('Error sending LineString data to Django.');
-            }
-        });
-    }
-
-    // Function to retrieve the CSRF token from cookies
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    // Event handler for when a feature is drawn
-    draw.on('drawend', function (event) {
-        const feature = event.feature;
-        const coordinates = feature.getGeometry().getCoordinates();
-
-        // Call the function to submit LineString data to Django
-        submitLineStringData(coordinates);
-    });
-</script>
 {% endblock %}

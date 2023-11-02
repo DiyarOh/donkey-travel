@@ -66,6 +66,22 @@ background-color: white;
     color: black;
     font-weight: bold;
 }
+
+#markerLabelOverlay {
+  background-color: white;
+  padding: 5px; /* Optional: Add padding for better appearance */
+  border: 1px solid #000; /* Optional: Add a border for the overlay */
+}
+
+#route-popup-content {
+  background-color: white;
+  padding: 10px;  /* Adjust the padding as needed */
+}
+
+#tracker-popup-content {
+  background-color: white;
+  padding: 10px;
+}
 /* Media queries for responsiveness */
 
 @media (max-width: 768px) {
