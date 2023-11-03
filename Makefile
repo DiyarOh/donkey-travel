@@ -36,3 +36,7 @@ stop:
 .PHONY: admin
 admin:
 	docker compose run web python manage.py createsuperuser
+
+.PHONY: test
+test: 
+	docker compose run web python manage.py test
