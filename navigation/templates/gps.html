@@ -23,7 +23,7 @@
         <ul class="map-list">
             {% for booking in bookings %}
             <a data-booking="{{ booking.id }}" href="#" onclick="fetchRoutes({{ booking.id }});">
-                <div class="booking-box">
+                <div class="booking-box2">
                     <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
                     <p><strong>Route:</strong> {{ booking.route }}</p>
                 </div>
